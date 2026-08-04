@@ -1,7 +1,7 @@
 # Properties and components
 
-Typed Event fields are conveniences, not the complete data model. `Property` and
-`Component` preserve repeated, multi-value, vendor, recurrence, and non-event data.
+Use `Property` and `Component` to obtain `.ics` data that does not have a dedicated Event
+field, including repeated values, vendor fields, recurrence data, and non-event sections.
 
 ## Property lookup
 
@@ -24,22 +24,22 @@ An empty/whitespace name throws `InvalidArgumentException`. Lookup never recurse
 | Member | Type | Meaning |
 | --- | --- | --- |
 | `name` | `string` | Uppercase property name. |
-| `type` | `string` | Lowercase Sabre value type, such as `text`, `date-time`, or `recur`. |
-| `value` | typed value/list/`null` | `null` for zero values, one atom for one value, a list for multiple values. |
-| `values` | `list<PropertyAtom>` | Every normalized value. |
+| `type` | `string` | The value type, such as `text`, `date-time`, or `recur`. |
+| `value` | value/list/`null` | The property value; repeated values are returned as a list. |
+| `values` | `list<PropertyAtom>` | Every value carried by the property. |
 | `parameters()` | `array<string,string\|list<string>>` | All uppercase parameter names. |
 | `parameter($name)` | `string\|list<string>\|null` | One case-insensitive parameter lookup. |
-| `rawValue()` | `string` | Sabre-decoded raw property value. |
+| `rawValue()` | `string` | The property value as text. |
 
 `PropertyAtom` may be `bool`, `int`, `float`, `string`, `CarbonImmutable`,
-`DateInterval`, or a structured array such as an RRULE map. Use `rawValue()` when a typed
-mapping is not appropriate. `value` and `values` are not original byte-for-byte lines.
+`DateInterval`, or a structured array such as an RRULE map. Use `rawValue()` when you need
+the text value. It does not include the original property name, parameters, or line folding.
 
 ## Component lookup
 
-`Calendar` exposes direct children through `components(?string $name = null)`,
+`Calendar` provides its first level of child components through `components(?string $name = null)`,
 `hasComponent(?string $name = null)`, and `component(string $name)`. `Component` exposes
-`components(?string $name = null)` for its own direct children. Names are trimmed,
+`components(?string $name = null)` for its own first-level children. Names are trimmed,
 case-insensitive, and non-empty. `component()` returns the first match or `null`.
 
 ```php
@@ -51,8 +51,9 @@ $fbType = $periods?->first()?->parameter('FBTYPE');
 `Component::$name` is uppercase. Generic components represent `VTODO`, `VJOURNAL`,
 `VFREEBUSY`, `VTIMEZONE`, unknown `X-*` components, and also generic views of events.
 
-## Raw Sabre escape hatch
+## Raw component access
 
-`Calendar::rawComponent()`, `Event::rawComponent()`, and `Component::rawComponent()` return
-a deep clone. Mutating it does not change hydrated data or later clones. Cloning the complete
-tree costs time and memory proportional to that tree; avoid calling it repeatedly in loops.
+`Calendar::rawComponent()`, `Event::rawComponent()`, and `Component::rawComponent()` provide
+the underlying Sabre component when the package does not expose the data you need directly.
+Changing the returned component does not change the `Calendar`, `Event`, or `Component`
+object. This call can be expensive for large calendars, so avoid repeating it in loops.

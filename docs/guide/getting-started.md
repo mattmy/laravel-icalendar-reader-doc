@@ -2,10 +2,9 @@
 
 ## What the package represents
 
-An iCalendar file is a `VCALENDAR` component containing properties and child components.
-The package parses and validates the complete document once, then returns a readonly
-`Calendar` snapshot. Common `VEVENT` data is mapped to typed `Event` objects; every direct
-property and component remains available through generic escape hatches.
+The package turns `.ics` content into a `Calendar` object. You can read calendar metadata,
+events, dates, attendees, alarms, properties, and non-event components without navigating
+the iCalendar text yourself.
 
 It is a reader only. It does not generate `.ics`, download URLs, synchronize CalDAV,
 persist calendars, or expand recurrence rules into occurrences.
@@ -15,8 +14,6 @@ persist calendars, or expand recurrence rules into occurrences.
 ```bash
 composer require mattmy/laravel-icalendar-reader
 ```
-
-Laravel discovers `CalendarServiceProvider` and the `ICalendar` facade automatically.
 
 ## Thirty-second example
 
@@ -34,8 +31,8 @@ foreach ($calendar->events() as $event) {
 }
 ```
 
-`allDay` and `isAllDay()` are identical. They are true only when `DTSTART` has the
-iCalendar `DATE` value type; midnight and 24-hour events are not guessed as all-day.
+`allDay` and `isAllDay()` return the same result. A midnight or 24-hour event is not
+necessarily an all-day event, so use either member instead of inferring it from the time.
 
 ## Dependency injection or facade
 
@@ -53,12 +50,12 @@ final class ImportCalendar
 }
 ```
 
-The container and facade resolve the same stateless singleton `Reader`. Dependency
-injection is easier to replace in application tests; the facade is convenient at call sites.
+Both styles return the same calendar data. Use dependency injection when your application
+already injects services, or the facade for shorter calls.
 
 ## Next steps
 
-- [Choose an input and failure policy](/guide/reading-input).
+- [Choose how to read `.ics` content and handle errors](/guide/reading-input).
 - [Understand dates, events, and UID queries](/guide/calendars-and-events).
-- [Access every unknown or non-event value](/guide/properties-and-components).
+- [Read properties and non-event data](/guide/properties-and-components).
 - [Review performance before processing large files](/guide/performance-and-security).

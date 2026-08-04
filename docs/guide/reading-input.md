@@ -1,7 +1,7 @@
 # Reading input
 
-All eight methods obtain `max_bytes`, resolve the floating timezone, read at most the
-configured bytes, parse strictly, validate, and hydrate the same model.
+Choose a method based on where the `.ics` data comes from. Every successful method returns
+the same `Calendar` object.
 
 ## String contents
 
@@ -11,8 +11,8 @@ $calendar = ICalendar::tryRead($contents);
 ```
 
 `$contents` is the complete iCalendar byte string, not a path or URL. `read()` returns
-`Calendar`; `tryRead()` returns `null` only when parsing or validation makes the calendar
-invalid. Both throw `CalendarTooLarge` and `InvalidConfiguration`.
+`Calendar`; `tryRead()` returns `null` when the content is not a valid iCalendar document.
+Both still report size and configuration errors as exceptions.
 
 ## Local path
 
@@ -38,7 +38,8 @@ try {
 ```
 
 `$stream` accepts a readable PHP stream resource. Reading starts at its current position.
-The package never rewinds or closes a caller-owned stream. Passing a non-stream or
+Reading starts from the stream's current position. The package does not rewind or close the
+stream for you. Passing a non-stream or
 write-only stream throws `InvalidCalendarSource`; an I/O failure throws
 `CalendarFileUnreadable`. `tryFromStream()` only converts `InvalidCalendar` to `null`.
 
@@ -49,18 +50,18 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-`$file` is an `Illuminate\Http\UploadedFile`. The package checks `isValid()` and reads its
-server-side temporary file. Client MIME type and filename do not determine validity.
+`$file` is an `Illuminate\Http\UploadedFile`. It provides the `.ics` content uploaded with
+a Laravel request. Client MIME type and filename do not prove that its content is valid.
 
-## Throwing versus nullable methods
+## Exceptions or `null`
 
 | Failure | `read*()` | `try*()` |
 | --- | --- | --- |
-| Invalid iCalendar syntax, root, or level-3 validation | throws `InvalidCalendar` | returns `null` |
+| Invalid iCalendar content | throws `InvalidCalendar` | returns `null` |
 | Missing/unreadable file | throws source exception | same exception |
 | Invalid stream/upload | throws `InvalidCalendarSource` | same exception |
 | Exceeds `max_bytes` | throws `CalendarTooLarge` | same exception |
 | Invalid `max_bytes` | throws `InvalidConfiguration` | same exception |
 
-Use throwing methods when issues must be reported. Use nullable methods when invalid user
-calendar content is an expected branch and source/configuration failures are still exceptional.
+Use `read*()` when you want details about invalid content. Use `try*()` when `null` is enough
+to tell your application that the user supplied an invalid calendar.

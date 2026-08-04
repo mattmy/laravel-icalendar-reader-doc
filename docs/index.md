@@ -3,7 +3,7 @@ layout: home
 hero:
   name: Laravel iCalendar Reader
   text: Understand every part of an .ics file
-  tagline: A typed, validated, Laravel-native read model without making application code navigate Sabre/VObject.
+  tagline: Read events, dates, attendees, alarms, properties, and components from .ics files with a Laravel-friendly API.
   actions:
     - theme: brand
       text: Read the documentation
@@ -14,12 +14,12 @@ hero:
 features:
   - title: Explicit input boundaries
     details: Read strings, local paths, streams, and Laravel uploads with one byte-limited validation pipeline.
-  - title: Typed event model
+  - title: Easy-to-use event data
     details: Work with immutable dates, all-day semantics, organizers, attendees, alarms, and categories.
   - title: No hidden data
     details: Inspect repeated, unknown, multi-value, recurrence, and non-event data through Property and Component.
   - title: Predictable failures
-    details: Choose throwing or nullable APIs while retaining structured validation and mapping warnings.
+    details: Choose whether invalid calendar content should throw an exception or return null, and inspect clear warning details.
 ---
 
 ## Requirements

@@ -1,7 +1,7 @@
 # Property 與 Component
 
-Typed Event 只是 convenience model。重複、多值、廠商、recurrence 與非 Event 資料
-由 `Property`、`Component` 完整保留。
+若 `.ics` 資料沒有對應的 Event 欄位，可使用 `Property` 與 `Component` 取得，包括
+重複值、多值、廠商欄位、recurrence 資料及非 Event 區段。
 
 ## Property 查詢
 
@@ -22,28 +22,29 @@ $object->property(string $name);
 | Member | 型別／意義 |
 | --- | --- |
 | `name` | 大寫 property name。 |
-| `type` | 小寫 Sabre value type。 |
-| `value` | 零值為 `null`、單值為 atom、多值為 list。 |
-| `values` | `list<PropertyAtom>`，所有 normalized values。 |
+| `type` | 值的類型，例如 `text`、`date-time` 或 `recur`。 |
+| `value` | Property 的值；多個值會以 list 回傳。 |
+| `values` | `list<PropertyAtom>`，property 內的所有值。 |
 | `parameters()` | `array<string,string\|list<string>>`。 |
 | `parameter($name)` | 大小寫不敏感取得一個 parameter；空白名稱無效。 |
-| `rawValue()` | Sabre decoded raw property value。 |
+| `rawValue()` | Property 的文字值。 |
 
 `PropertyAtom` 可能是 `bool`、`int`、`float`、`string`、`CarbonImmutable`、
-`DateInterval` 或 RRULE map 等 structured array。需要未經 typed mapping 的值時用
-`rawValue()`；它仍不是原始 byte-for-byte content line。
+`DateInterval` 或 RRULE map 等 structured array。需要文字值時使用 `rawValue()`；
+它不包含原始 property 名稱、parameters 或折行格式。
 
 ## Component 查詢
 
 `Calendar` 提供 `components(?string $name = null)`、`hasComponent(?string $name = null)`、
 `component(string $name)`；`Component` 提供自己的 `components(?string $name = null)`。
-名稱大小寫不敏感、不可空白且只查 direct children。`component()` 取第一筆或 `null`。
+名稱不區分大小寫、不可空白，而且只查下一層。`component()` 會取得第一筆，找不到時
+回傳 `null`。
 
 Generic `Component` 代表 `VTODO`、`VJOURNAL`、`VFREEBUSY`、`VTIMEZONE`、未知
 `X-*`，也包含 Event 的 generic view；`name` 為大寫。
 
-## Raw Sabre escape hatch
+## Raw component 存取
 
-`Calendar`、`Event`、`Component` 的 `rawComponent()` 每次回傳 deep clone。修改不會
-影響 hydrated data 或下一次 clone，但完整樹 clone 的時間與記憶體成本與樹大小成正比，
-不要在 loop 重複呼叫。
+當套件沒有直接提供所需資料時，可使用 `Calendar`、`Event`、`Component` 的
+`rawComponent()` 取得底層 Sabre component。修改回傳值不會改變原本的物件。
+大型行事曆呼叫此方法可能較耗資源，請避免在 loop 中重複呼叫。

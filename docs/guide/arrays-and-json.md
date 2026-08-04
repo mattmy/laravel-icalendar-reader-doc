@@ -1,21 +1,20 @@
 # Arrays and JSON
 
-## Domain-oriented output
+## Calendar and event output
 
-`Calendar::toArray()` returns fixed snake_case calendar metadata, `events`, and `warnings`.
-Each Event includes typed common fields converted to strings, plus nested organizer,
+`Calendar::toArray()` returns snake_case calendar metadata, `events`, and `warnings`.
+Each Event includes common fields converted to strings, plus nested organizer,
 attendees, alarms, and categories. Missing values remain `null`; repeated values remain lists.
 
-`jsonSerialize()` is exactly `toArray()`. `toJson(int $options = 0)` passes `$options`
-to `json_encode` and always adds `JSON_THROW_ON_ERROR`, so encoding errors throw
-`JsonException`.
+`jsonSerialize()` returns the same data as `toArray()`. `toJson(int $options = 0)` accepts
+normal PHP `json_encode()` options. JSON conversion errors throw `JsonException`.
 
 ```php
 $payload = $calendar->toArray();
 $json = $calendar->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 ```
 
-## Complete normalized tree
+## Complete component data
 
 `toComponentArray()` recursively returns:
 
@@ -34,6 +33,6 @@ $json = $calendar->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 ]
 ```
 
-Use `toArray()` for application/event APIs and `toComponentArray()` when complete
-normalized non-event, unknown, repeated, or vendor data matters. Neither method recreates
+Use `toArray()` for calendar and event data. Use `toComponentArray()` when non-event,
+unknown, repeated, or vendor data matters. Neither method recreates
 the original `.ics`: line folding, casing, newline style, and byte formatting are not retained.

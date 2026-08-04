@@ -1,10 +1,10 @@
 # Validation and configuration
 
-## Validation pipeline
+## Invalid content and warnings
 
-Parsing uses Sabre/VObject strict options, requires a `VCALENDAR` root, then calls
-`validate()` without repair. Level-3 issues make the input invalid. Level-2 issues return a
-Calendar and appear in `warnings()`; configuration and mapping warnings are merged with them.
+Invalid `.ics` content causes `read*()` methods to throw `InvalidCalendar` and `try*()`
+methods to return `null`. Content that can still be read may include warnings available from
+`$calendar->warnings()`.
 
 ```php
 try {
@@ -25,7 +25,7 @@ try {
 | `level` | `2` warning or `3` error. |
 | `code` | `parser_error`, `invalid_root_component`, `validation_error`, `validation_warning`, `invalid_timezone_configuration`, or `mapping_warning`. |
 | `message` | Human-readable details; do not use it as a machine code. |
-| `source` | `parser`, `validator`, `configuration`, or `mapping`. |
+| `source` | Which part of reading the calendar reported the issue. |
 | `line` | Optional source line. |
 | `component`, `property` | Optional affected iCalendar names. |
 
@@ -46,13 +46,12 @@ Publish it with:
 php artisan vendor:publish --tag=icalendar-reader-config
 ```
 
-`max_bytes` must be a positive integer and limits actual bytes for every source. Invalid
-values throw `InvalidConfiguration` before parsing.
+`max_bytes` must be a positive integer and sets the largest `.ics` input the package accepts.
+Invalid values throw `InvalidConfiguration`.
 
-`floating_timezone` is an optional IANA timezone for DATE and floating DATE-TIME values.
-When `null`, valid `app.timezone` is used. Invalid package/app values generate warnings;
-the safe final fallback is UTC. Even with a valid package override, invalid `app.timezone`
-is reported so deployment mistakes remain visible.
+`floating_timezone` supplies a timezone for dates and times that do not include one. When it
+is `null`, the package uses `app.timezone`. Invalid timezone settings produce a warning and
+UTC is used, so date values remain available.
 
 ## Exception reference
 

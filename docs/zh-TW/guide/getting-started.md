@@ -2,9 +2,8 @@
 
 ## 套件代表的資料模型
 
-iCalendar 檔案是包含 properties 與 child components 的 `VCALENDAR`。套件會完整
-解析及驗證一次，再回傳 readonly `Calendar` snapshot。常用 `VEVENT` 資料映射為
-typed `Event`；所有 direct property 與 component 仍可由 generic API 取得。
+套件會將 `.ics` 內容轉成 `Calendar` 物件，讓你取得行事曆資訊、事件、日期、參與者、
+提醒、properties 與非事件 components，不必自行閱讀 iCalendar 文字內容。
 
 它只負責讀取，不產生 `.ics`、不下載 URL、不同步 CalDAV、不儲存資料，也不將
 recurrence rule 展開成 occurrences。
@@ -14,8 +13,6 @@ recurrence rule 展開成 occurrences。
 ```bash
 composer require mattmy/laravel-icalendar-reader
 ```
-
-Laravel 會自動發現 `CalendarServiceProvider` 與 `ICalendar` facade。
 
 ## 30 秒範例
 
@@ -33,8 +30,8 @@ foreach ($calendar->events() as $event) {
 }
 ```
 
-`allDay` 與 `isAllDay()` 永遠相同，只有 `DTSTART` 使用 iCalendar `DATE` value type
-才是 `true`，不會把午夜或 24 小時事件猜成全天。
+`allDay` 與 `isAllDay()` 的結果相同。午夜開始或持續 24 小時不一定代表全天事件，
+請直接使用這兩者之一，不要依時間自行推測。
 
 ## Dependency injection 或 facade
 
@@ -50,10 +47,10 @@ final class ImportCalendar
 }
 ```
 
-Container 與 facade 會取得同一個 stateless singleton `Reader`。Dependency injection
-較容易在應用程式測試替換；facade 則讓呼叫端更簡潔。
+兩種寫法都會取得相同的行事曆資料。應用程式原本就使用依賴注入時可選 `Reader`，
+希望呼叫簡短時可使用 facade。
 
-下一步可閱讀[輸入與失敗策略](/zh-TW/guide/reading-input)、
+下一步可閱讀[如何讀取 `.ics` 與處理錯誤](/zh-TW/guide/reading-input)、
 [Calendar 與 Event](/zh-TW/guide/calendars-and-events)、
-[完整資料 escape hatch](/zh-TW/guide/properties-and-components)，以及處理大型檔案前
+[取得 properties 與非事件資料](/zh-TW/guide/properties-and-components)，以及處理大型檔案前
 必讀的[效能與安全](/zh-TW/guide/performance-and-security)。

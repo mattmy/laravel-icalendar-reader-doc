@@ -11,7 +11,7 @@
 | `name` | `?string` | `CN` parameter. |
 | `sentBy` | `?string` | `SENT-BY` parameter. |
 | `directory` | `?string` | `DIR` parameter. |
-| `parameters()` | `array<string,string\|list<string>>` | Every normalized parameter. |
+| `parameters()` | `array<string,string\|list<string>>` | Every parameter attached to `ORGANIZER`. |
 
 ## Attendee
 
@@ -27,20 +27,21 @@
 
 ## Alarm
 
-`Alarm` represents a direct `VALARM` inside an event. `action`, `description`, and
-`summary` are nullable strings; `attendees` preserves alarm attendees; `repeat` is the
-optional repeat count; `duration` is the optional delay between repetitions.
+`Alarm` represents a reminder inside an event. `action`, `description`, and `summary` contain
+the reminder details when present. `attendees` contains the reminder's attendees, `repeat`
+contains how many times it repeats, and `duration` contains the time between repeats.
 
 `trigger` is an optional `AlarmTrigger`:
 
 ```php
 $trigger->isRelative(); // bool
 $trigger->isAbsolute(); // bool
-$trigger->duration();   // ?DateInterval, defensive clone
+$trigger->duration();   // ?DateInterval: relative time before or after the event
 $trigger->dateTime();   // ?CarbonImmutable
 $trigger->relatedTo();  // START, END, or null for absolute triggers
 ```
 
-Relative triggers use a signed duration such as `-PT15M`. `DateInterval::$invert` records
-the sign. Absolute triggers use `VALUE=DATE-TIME`. A malformed/unmappable trigger can leave
-the typed trigger `null` while its raw Property remains reachable through the component tree.
+For a relative trigger, `duration()` gives the time before or after the event and
+`relatedTo()` indicates whether it relates to the start or end. For an absolute trigger,
+`dateTime()` gives the reminder date and time. If `trigger` is `null`, inspect the alarm's
+properties when you need its original value.
