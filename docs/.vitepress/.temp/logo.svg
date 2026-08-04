@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Calendar">
+  <rect x="8" y="12" width="48" height="44" rx="6" fill="#3451b2"/>
+  <path d="M8 24h48" stroke="#fff" stroke-width="4"/>
+  <path d="M20 8v10M44 8v10" stroke="#3451b2" stroke-width="5" stroke-linecap="round"/>
+  <path d="M20 34h8v8h-8zM36 34h8v8h-8z" fill="#fff"/>
+</svg>
