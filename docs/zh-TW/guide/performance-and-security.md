@@ -5,12 +5,12 @@
 - 讀取時需要的記憶體會高於 `.ics` 檔案大小。Properties、components、attendees、
   alarms 或時區定義越多，所需時間與記憶體越高。
 - 不論資料來自 path、stream 或 upload，通過大小限制的完整行事曆都會留在記憶體中。
-- 對大型行事曆重複呼叫 `events()`、`properties()`、`components()`、`event()` 或
-  `eventsBetween()` 會增加負擔；可以時請保留並重用查詢結果。
+- 對大型行事曆重複呼叫 `events()`、`todos()`、UID 查詢、`properties()`、
+  `components()` 或 `eventsBetween()` 會增加負擔；可以時請保留並重用查詢結果。
 - `toArray()`、`toJson()`，尤其 `toComponentArray()`，會建立完整輸出資料；大型
   Calendar 不要在不需要時同時產生多種格式。
 - 大型行事曆呼叫 `rawComponent()` 可能較耗資源，請取得一次後重用。
-- Recurrence rule 不會展開，套件只回傳 `.ics` 中實際存在的 Event components。
+- Recurrence rule 不會展開，套件只回傳 `.ics` 中實際存在的 Event 與 Todo components。
 
 Benchmark 不是 production capacity 承諾。請使用實際最大的 Calendar 測試，再決定
 request、queue 與 memory limits。`max_bytes` 應明顯低於 PHP worker memory limit，並

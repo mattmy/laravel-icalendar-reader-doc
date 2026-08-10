@@ -1,50 +1,65 @@
 # Property 與 Component
 
-若 `.ics` 資料沒有對應的 Event 欄位，可使用 `Property` 與 `Component` 取得，包括
-重複值、多值、廠商欄位、recurrence 資料及非 Event 區段。
+常見的 Calendar、Event 與 Todo 資料都有直接欄位。重複值、廠商擴充、未知欄位，
+以及沒有專用資料物件的 component 類型，則可透過 `Property` 與 `Component` 取得，
+避免資料被靜默捨棄。
 
 ## Property 查詢
 
-`Calendar`、`Event`、`Component` 都提供：
+`Calendar`、`Event`、`Todo`、`Component` 都提供相同的 direct-property 方法：
 
 ```php
-$object->properties(?string $name = null);
-$object->hasProperty(?string $name = null);
-$object->property(string $name);
+$object->properties();
+$object->properties('ATTENDEE');
+$object->hasProperty();
+$object->hasProperty('RRULE');
+$object->property('SUMMARY');
 ```
 
-`$name` 會 trim 並採大小寫不敏感比較；`null` 代表全部 direct properties；空白名稱
-拋 `InvalidArgumentException`。查詢不遞迴，`property()` 取第一筆，`properties()`
-保留所有同名資料與文件順序。
+名稱會 trim 並採大小寫不敏感比較。`null` 代表全部 direct properties；空白名稱會拋出
+`InvalidArgumentException`。查詢不遞迴；`property()` 取第一筆，`properties()` 則保留
+全部符合資料與文件順序。
 
-## Property object
+## Property 值
 
-| Member | 型別／意義 |
-| --- | --- |
-| `name` | 大寫 property name。 |
-| `type` | 值的類型，例如 `text`、`date-time` 或 `recur`。 |
-| `value` | Property 的值；多個值會以 list 回傳。 |
-| `values` | `list<PropertyAtom>`，property 內的所有值。 |
-| `parameters()` | `array<string,string\|list<string>>`。 |
-| `parameter($name)` | 大小寫不敏感取得一個 parameter；空白名稱無效。 |
-| `rawValue()` | Property 的文字值。 |
+| Member | 型別 | 意義 |
+| --- | --- | --- |
+| `name` | `string` | 大寫 property name。 |
+| `type` | `string` | 值類型，例如 `text`、`date-time` 或 `recur`。 |
+| `value` | value/list/`null` | 方便使用的單值；重複值則為 list。 |
+| `values` | `list<PropertyAtom>` | Property 攜帶的全部值。 |
+| `parameters()` | `array<string,string\|list<string>>` | 全部 parameters，名稱為大寫。 |
+| `parameter($name)` | `string\|list<string>\|null` | 大小寫不敏感取得一個 parameter。 |
+| `rawValue()` | `string` | Property 的文字值。 |
+| `toArray()` | `array` | 上述資料的可序列化快照。 |
 
 `PropertyAtom` 可能是 `bool`、`int`、`float`、`string`、`CarbonImmutable`、
-`DateInterval` 或 RRULE map 等 structured array。需要文字值時使用 `rawValue()`；
-它不包含原始 property 名稱、parameters 或折行格式。
+`DateInterval` 或 RRULE map 等 structured array。`rawValue()` 不包含 property name、
+parameters 或原始折行格式。
+
+`Property::toArray()` 回傳 `name`、`type`、`value`、`values`、`parameters` 與
+`raw_value`，適合用於 API 回傳 generic property。
 
 ## Component 查詢
 
-`Calendar` 提供 `components(?string $name = null)`、`hasComponent(?string $name = null)`、
-`component(string $name)`；`Component` 提供自己的 `components(?string $name = null)`。
-名稱不區分大小寫、不可空白，而且只查下一層。`component()` 會取得第一筆，找不到時
-回傳 `null`。
+`Calendar` 以 `components(?string $name = null)`、`hasComponent(?string $name = null)`、
+`component(string $name)` 查詢第一層子 components；generic `Component` 則以
+`components(?string $name = null)` 查詢自己的第一層子 components。
 
-Generic `Component` 代表 `VTODO`、`VJOURNAL`、`VFREEBUSY`、`VTIMEZONE`、未知
-`X-*`，也包含 Event 的 generic view；`name` 為大寫。
+```php
+$freeBusy = $calendar->component('VFREEBUSY');
+$periods = $freeBusy?->properties('FREEBUSY');
+$fbType = $periods?->first()?->parameter('FBTYPE');
+```
+
+名稱會 trim、大小寫不敏感且不可空白。查詢只看下一層；`component()` 取第一筆，
+找不到時回傳 `null`。`Component::$name` 為大寫。Generic components 可代表
+`VEVENT`、`VTODO`、`VJOURNAL`、`VFREEBUSY`、`VTIMEZONE`
+及未知 `X-*` components。
 
 ## Raw component 存取
 
-當套件沒有直接提供所需資料時，可使用 `Calendar`、`Event`、`Component` 的
-`rawComponent()` 取得底層 Sabre component。修改回傳值不會改變原本的物件。
-大型行事曆呼叫此方法可能較耗資源，請避免在 loop 中重複呼叫。
+`Calendar::rawComponent()`、`Event::rawComponent()`、`Todo::rawComponent()` 與
+`Component::rawComponent()` 會回傳供進階用途使用的獨立 Sabre component；修改它
+不會改變套件的 read model。建立副本對大型行事曆可能較耗資源，請重用結果，避免在
+loop 中重複呼叫。

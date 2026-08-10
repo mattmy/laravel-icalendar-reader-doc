@@ -1,5 +1,7 @@
 # Participants and alarms
 
+Events and todos expose typed organizers, attendees, and nested alarms.
+
 ## Organizer
 
 `Organizer` represents one `ORGANIZER` property.
@@ -11,37 +13,45 @@
 | `name` | `?string` | `CN` parameter. |
 | `sentBy` | `?string` | `SENT-BY` parameter. |
 | `directory` | `?string` | `DIR` parameter. |
-| `parameters()` | `array<string,string\|list<string>>` | Every parameter attached to `ORGANIZER`. |
+| `parameters()` | `array<string,string\|list<string>>` | Every parameter, including unknown ones. |
 
 ## Attendee
 
-`Attendee` represents one repeated `ATTENDEE` property. No attendee is collapsed by address.
+`Attendee` represents one repeated `ATTENDEE` property. Attendees are not merged by address.
 
 | Member | Type | Meaning |
 | --- | --- | --- |
-| `address`, `email`, `name` | `string`, `?string`, `?string` | Address and common identity fields. |
+| `address` | `string` | Original cal-address. |
+| `email`, `name` | `?string` | Address without `mailto:` and the `CN` display name. |
 | `role`, `status`, `type` | `?string` | Uppercase `ROLE`, `PARTSTAT`, and `CUTYPE`. |
-| `rsvp` | `?bool` | `TRUE`, `FALSE`, or `null` when absent/unrecognized. |
-| `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | All delegation addresses. |
+| `rsvp` | `?bool` | `TRUE`, `FALSE`, or `null` when absent or unrecognized. |
+| `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | Every delegation address. |
 | `parameters()` | `array<string,string\|list<string>>` | Every parameter, including unknown ones. |
 
-## Alarm
+## Alarm and trigger
 
-`Alarm` represents a reminder inside an event. `action`, `description`, and `summary` contain
-the reminder details when present. `attendees` contains the reminder's attendees, `repeat`
-contains how many times it repeats, and `duration` contains the time between repeats.
+Each `Alarm` represents one `VALARM` inside an event or todo.
 
-`trigger` is an optional `AlarmTrigger`:
+| Member | Type | Meaning |
+| --- | --- | --- |
+| `action` | `?string` | `ACTION`. |
+| `trigger` | `?AlarmTrigger` | Relative or absolute `TRIGGER`; invalid or absent values return `null`. |
+| `description`, `summary` | `?string` | Reminder text. |
+| `attendees` | `Collection<int, Attendee>` | Repeated alarm attendees in document order. |
+| `repeat` | `?int` | `REPEAT` count. |
+| `duration` | `?DateInterval` | Time between repeats. |
 
 ```php
-$trigger->isRelative(); // bool
-$trigger->isAbsolute(); // bool
-$trigger->duration();   // ?DateInterval: relative time before or after the event
-$trigger->dateTime();   // ?CarbonImmutable
-$trigger->relatedTo();  // START, END, or null for absolute triggers
+$trigger = $event->alarms->first()?->trigger;
+
+$trigger?->isRelative(); // ?bool
+$trigger?->isAbsolute(); // ?bool
+$trigger?->duration();   // ?DateInterval
+$trigger?->dateTime();   // ?CarbonImmutable
+$trigger?->relatedTo();  // START, END, or null
 ```
 
-For a relative trigger, `duration()` gives the time before or after the event and
-`relatedTo()` indicates whether it relates to the start or end. For an absolute trigger,
-`dateTime()` gives the reminder date and time. If `trigger` is `null`, inspect the alarm's
-properties when you need its original value.
+For a relative trigger, `duration()` is the offset before or after the related event or todo
+boundary, and `relatedTo()` identifies its start or end. For an absolute trigger,
+`dateTime()` is the reminder time. If the typed trigger is `null` and you need the original
+value, inspect the parent event or todo through its generic properties or raw component.

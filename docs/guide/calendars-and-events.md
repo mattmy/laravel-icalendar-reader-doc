@@ -1,63 +1,105 @@
-# Calendars and events
+# Calendars, events, and todos
 
-## Calendar
+## Calendar metadata and queries
 
-`Calendar` represents the data in one valid `.ics` calendar. Its public metadata is
-`version`, `productId`, `method`, `calendarScale`, and the timezone used for times without one,
-`floatingTimezone`. Missing optional properties are `null`.
+`Calendar` represents one valid `VCALENDAR`. Its public metadata is `version`, `productId`,
+`method`, `calendarScale`, and `floatingTimezone`. Missing optional metadata is `null`.
 
 ```php
 $calendar->events();
 $calendar->events('uid@example.test');
-$calendar->hasEvents();
-$calendar->hasEvents('uid@example.test');
 $calendar->event('uid@example.test');
+$calendar->hasEvents('uid@example.test');
+
+$calendar->todos();
+$calendar->todos('task@example.test');
+$calendar->todo('task@example.test');
+$calendar->hasTodos('task@example.test');
 ```
 
-The optional `$uid` is compared exactly and case-sensitively without trimming. `events()`
-returns every `VEVENT` found in the file, in the same order. If the same UID is used for a
-recurring event, `event($uid)` returns the main event when available; otherwise, the first match.
+UID filters are exact, case-sensitive, and are not trimmed. Plural methods return every match
+in document order. Singular methods prefer the component without `RECURRENCE-ID`; when no
+master exists, they return the first matching override. A missing match returns `null`, and
+plural queries return an empty `Collection`.
 
-## Event fields
+## Fields shared by Event and Todo
 
-| Property | Type | Meaning |
+| Field | Type | Data returned |
 | --- | --- | --- |
 | `uid` | `?string` | Exact `UID`. |
-| `summary`, `description`, `location`, `url` | `?string` | Decoded common text/URI fields. |
-| `startsAt`, `endsAt` | `?CarbonImmutable` | Start and exclusive end. End may be derived from `DURATION`. |
-| `allDay` | `bool` | Whether the event is marked as an all-day event. |
-| `startIsFloating`, `endIsFloating` | `bool` | Whether the start or end has no timezone of its own. |
-| `lastDay` | `?CarbonImmutable` | Inclusive last date for an all-day event. |
-| `duration` | `?DateInterval` | How long the event lasts. |
-| `timestamp`, `createdAt`, `lastModifiedAt` | `?CarbonImmutable` | `DTSTAMP`, `CREATED`, `LAST-MODIFIED`. |
-| `status`, `classification` | `?string` | Uppercase `STATUS` and `CLASS`. |
+| `summary`, `description`, `location`, `url` | `?string` | Common text and URI values. |
+| `startsAt` | `?CarbonImmutable` | `DTSTART` interpreted with its UTC, `TZID`, floating, or DATE semantics. |
+| `startIsDate` | `bool` | Whether `DTSTART` uses `VALUE=DATE`. |
+| `startIsFloating` | `bool` | Whether `DTSTART` is DATE or a DATE-TIME without `TZID` or `Z`. |
+| `duration` | `?DateInterval` | Explicit or boundary-derived effective duration. |
+| `timestamp`, `createdAt`, `lastModifiedAt` | `?CarbonImmutable` | `DTSTAMP`, `CREATED`, and `LAST-MODIFIED`. |
+| `classification`, `status` | `?string` | Uppercase `CLASS` and `STATUS` source tokens. |
 | `priority`, `sequence` | `?int` | Integer metadata. |
-| `organizer` | `?Organizer` | Event organizer details. |
-| `attendees` | `Collection<int, Attendee>` | Repeated attendees in order. |
+| `recurrenceId` | `?CarbonImmutable` | `RECURRENCE-ID`. |
+| `recurrenceIdIsDate`, `recurrenceIdIsFloating` | `bool` | Source value-type and floating flags for `RECURRENCE-ID`. |
+| `organizer` | `?Organizer` | Organizer address and parameters. |
+| `attendees` | `Collection<int, Attendee>` | Repeated attendees in document order. |
 | `alarms` | `Collection<int, Alarm>` | Direct `VALARM` children. |
-| `categories` | `Collection<int, string>` | All category values. |
+| `categories` | `Collection<int, string>` | Flattened `CATEGORIES` text-list values in order. |
+| `geo` | `?array{latitude: float, longitude: float}` | An in-range `GEO` pair; malformed or out-of-range data returns `null`. |
+| `comments`, `contacts` | `Collection<int, string>` | One decoded string per repeated `COMMENT` or `CONTACT`. |
+| `resources` | `Collection<int, string>` | Flattened `RESOURCES` text-list values in order. |
+| `recurrenceRule` | `?Property` | First `RRULE`, including values, parameters, and raw text. |
+| `attachments` | `Collection<int, Property>` | Every `ATTACH`. |
+| `exceptionDates` | `Collection<int, Property>` | Every `EXDATE`. |
+| `requestStatuses` | `Collection<int, Property>` | Every `REQUEST-STATUS`. |
+| `relatedTo` | `Collection<int, Property>` | Every `RELATED-TO`. |
+| `recurrenceDates` | `Collection<int, Property>` | Every `RDATE`. |
 
-## Date and duration notes
+These convenience fields do not remove their generic properties. For example, an invalid
+typed `geo` remains available through `property('GEO')`.
 
-- UTC values retain UTC. Resolvable `TZID` values retain that timezone.
-- Dates and times without a timezone use the configured timezone.
-- An unknown `TZID` adds a warning and leaves the matching date field as `null`; you can still
-  get the original value through its Property.
-- `DTEND` is exclusive. All-day `lastDay` is `endsAt - 1 calendar day`.
-- An all-day event without `DTEND` gets an implicit one-calendar-day end.
-- `endsAt` is available when the event provides either an end or a usable duration.
-- `duration` is available when the event provides enough start/end or duration data.
+## Event-only fields
 
-`DateInterval` can be modified by PHP. Copy it before changing it if the original event value
-must remain unchanged.
+| Field | Type | Data returned |
+| --- | --- | --- |
+| `endsAt` | `?CarbonImmutable` | Exclusive `DTEND`, or an end derived from duration/all-day rules. |
+| `endIsDate`, `endIsFloating` | `bool` | Value-type and floating flags for the explicit or derived end. |
+| `allDay` | `bool` | Whether `DTSTART` uses `VALUE=DATE`; identical to `isAllDay()`. |
+| `lastDay` | `?CarbonImmutable` | Inclusive final date for an all-day event. |
+| `transparency` | `?string` | Uppercase source `TRANSP` token; absent stays `null`. |
 
-## Range queries
+Do not infer an all-day event from midnight or a 24-hour duration. Use `allDay`,
+`startIsDate`, or `isAllDay()`.
+
+## Todo-only fields
+
+| Field | Type | Data returned |
+| --- | --- | --- |
+| `completedAt` | `?CarbonImmutable` | UTC `COMPLETED`. |
+| `dueAt` | `?CarbonImmutable` | Explicit `DUE`, or `DTSTART + DURATION`. |
+| `dueIsDate`, `dueIsFloating` | `bool` | Flags from `DUE`, or inherited from `DTSTART` when due is derived. |
+| `percentComplete` | `?int` | `PERCENT-COMPLETE`. |
+
+Todo has no implicit one-day duration. Without enough `DTSTART`, `DUE`, or `DURATION` data,
+`dueAt` and `duration` remain `null`.
+
+## Date and duration behavior
+
+- UTC values retain UTC; resolvable `TZID` values retain that timezone.
+- Floating DATE-TIME values use `Calendar::$floatingTimezone`.
+- An unresolved document `TZID` adds a warning and leaves the typed date field `null`; the
+  original Property remains available.
+- `DTEND` is exclusive. All-day `lastDay` is one calendar day before `endsAt`.
+- An all-day Event without `DTEND` gets an implicit one-calendar-day end.
+- Derived Event end flags and Todo due flags inherit their start flags.
+- `RECURRENCE-ID` flags always describe that property itself.
+- `DateInterval` is mutable in PHP; clone it before changing a value you need to retain.
+
+Recurrence properties are parsed and preserved, but occurrences are not expanded.
+
+## Event range queries
 
 ```php
 $events = $calendar->eventsBetween($from, $until);
 ```
 
-`$from` and `$until` accept `DateTimeInterface`. `$from` must be earlier than `$until`, or an
-`InvalidArgumentException` is thrown. An event starting exactly at `$until` is not included.
-Events without a usable start are excluded. Recurrence rules are not expanded; only events
-actually present in the `.ics` file are returned.
+Both boundaries accept `DateTimeInterface`. The interval is half-open: `$from` is included and
+an event starting exactly at `$until` is excluded. `$from` must be earlier than `$until`, or
+`InvalidArgumentException` is thrown. Events without a usable start are excluded, and only
+VEVENT components actually present in the calendar are returned.

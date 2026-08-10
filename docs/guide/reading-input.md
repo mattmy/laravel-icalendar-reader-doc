@@ -3,6 +3,12 @@
 Choose a method based on where the `.ics` data comes from. Every successful method returns
 the same `Calendar` object.
 
+The examples use the facade:
+
+```php
+use Mattmy\ICalendar\Facades\ICalendar;
+```
+
 ## String contents
 
 ```php
@@ -37,10 +43,9 @@ try {
 }
 ```
 
-`$stream` accepts a readable PHP stream resource. Reading starts at its current position.
-Reading starts from the stream's current position. The package does not rewind or close the
-stream for you. Passing a non-stream or
-write-only stream throws `InvalidCalendarSource`; an I/O failure throws
+`$stream` accepts a readable PHP stream resource. Reading starts from its current position.
+The package does not rewind or close the stream for you. Passing a non-stream or write-only
+stream throws `InvalidCalendarSource`; an I/O failure throws
 `CalendarFileUnreadable`. `tryFromStream()` only converts `InvalidCalendar` to `null`.
 
 ## UploadedFile
@@ -52,6 +57,7 @@ $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 
 `$file` is an `Illuminate\Http\UploadedFile`. It provides the `.ics` content uploaded with
 a Laravel request. Client MIME type and filename do not prove that its content is valid.
+Validate that the request contains a file before calling this method.
 
 ## Exceptions or `null`
 
@@ -65,3 +71,23 @@ a Laravel request. Client MIME type and filename do not prove that its content i
 
 Use `read*()` when you want details about invalid content. Use `try*()` when `null` is enough
 to tell your application that the user supplied an invalid calendar.
+
+## Facade or dependency injection
+
+The facade and the container-bound `Reader` expose the same methods and return the same data.
+Inject `Reader` when the surrounding application already uses constructor injection:
+
+```php
+use Mattmy\ICalendar\Calendar;
+use Mattmy\ICalendar\Reader;
+
+final class ImportCalendar
+{
+    public function __construct(private Reader $reader) {}
+
+    public function handle(string $contents): Calendar
+    {
+        return $this->reader->read($contents);
+    }
+}
+```

@@ -4,7 +4,7 @@ const repositoryUrl = 'https://github.com/mattmy/laravel-icalendar-reader'
 const pages = [
   ['Getting started', 'getting-started'],
   ['Reading input', 'reading-input'],
-  ['Calendars and events', 'calendars-and-events'],
+  ['Calendars, events, and todos', 'calendars-and-events'],
   ['Properties and components', 'properties-and-components'],
   ['Participants and alarms', 'participants-and-alarms'],
   ['Validation and configuration', 'validation-and-configuration'],
@@ -15,7 +15,7 @@ const pages = [
 const pagesZh = [
   ['開始使用', 'getting-started'],
   ['讀取輸入', 'reading-input'],
-  ['Calendar 與 Event', 'calendars-and-events'],
+  ['Calendar、Event 與 Todo', 'calendars-and-events'],
   ['Property 與 Component', 'properties-and-components'],
   ['參與者與提醒', 'participants-and-alarms'],
   ['驗證與設定', 'validation-and-configuration'],

@@ -6,13 +6,13 @@
   components, attendees, alarms, or timezone definitions require more memory and time.
 - The complete accepted calendar remains in memory, including when it comes from a path,
   stream, or upload.
-- Repeated calls to `events()`, `properties()`, `components()`, `event()`, or
+- Repeated calls to `events()`, `todos()`, UID lookups, `properties()`, `components()`, or
   `eventsBetween()` over large calendars add work. Keep and reuse results when possible.
 - `toArray()`, `toJson()`, and especially `toComponentArray()` create complete output data.
   Avoid producing multiple formats for the same large calendar unless required.
 - `rawComponent()` can be expensive for large calendars. Call it once and reuse the result.
-- Recurrence rules are not expanded, so the package only returns event components actually
-  present in the `.ics` file.
+- Recurrence rules are not expanded, so the package only returns event and todo components
+  actually present in the `.ics` file.
 
 The bundled benchmark is not a production capacity promise. Test with your largest real-world
 calendars before selecting request, queue, and memory limits.

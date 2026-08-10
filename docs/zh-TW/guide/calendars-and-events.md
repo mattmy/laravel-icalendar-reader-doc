@@ -1,56 +1,102 @@
-# Calendar 與 Event
+# Calendar、Event 與 Todo
 
-## Calendar
+## Calendar metadata 與查詢
 
-`Calendar` 代表一份合法 `.ics` 行事曆中的資料。Public metadata 包含 `version`、
-`productId`、`method`、`calendarScale`，以及沒有指定時區的時間所使用的
-`floatingTimezone`；`.ics` 沒有提供的欄位會是 `null`。
+`Calendar` 代表一份合法 `VCALENDAR`。Public metadata 包含 `version`、`productId`、
+`method`、`calendarScale` 與 `floatingTimezone`；缺少的 optional metadata 是 `null`。
 
 ```php
-$calendar->events(?string $uid = null);
-$calendar->hasEvents(?string $uid = null);
-$calendar->event(string $uid);
+$calendar->events();
+$calendar->events('uid@example.test');
+$calendar->event('uid@example.test');
+$calendar->hasEvents('uid@example.test');
+
+$calendar->todos();
+$calendar->todos('task@example.test');
+$calendar->todo('task@example.test');
+$calendar->hasTodos('task@example.test');
 ```
 
-`$uid` 會區分大小寫，也不會自動移除前後空白。`events()` 依文件順序回傳所有
-`VEVENT`。同一個 UID 屬於重複事件時，`event($uid)` 會優先回傳主要事件；找不到時
-回傳第一筆符合的事件。
+UID 採精確且區分大小寫的比對，不會 trim。複數方法依文件順序回傳所有符合資料；單數
+方法優先回傳沒有 `RECURRENCE-ID` 的 master，沒有 master 時回傳第一筆 override。
+找不到單筆時回傳 `null`，複數查詢則回傳空 Collection。
 
-## Event 欄位
+## Event 與 Todo 共用欄位
 
-| Property | 型別 | 意義 |
+| 欄位 | 型別 | 可取得的資料 |
 | --- | --- | --- |
 | `uid` | `?string` | 精確 `UID`。 |
-| `summary`, `description`, `location`, `url` | `?string` | 常用文字／URI。 |
-| `startsAt`, `endsAt` | `?CarbonImmutable` | 開始及 exclusive 結束；end 可由 `DURATION` 推導。 |
-| `allDay` | `bool` | 事件是否標示為全天事件。 |
-| `startIsFloating`, `endIsFloating` | `bool` | 開始或結束時間本身是否未指定時區。 |
-| `lastDay` | `?CarbonImmutable` | 全天事件 inclusive 最後日期。 |
-| `duration` | `?DateInterval` | 事件持續多久。 |
+| `summary`, `description`, `location`, `url` | `?string` | 常用文字與 URI。 |
+| `startsAt` | `?CarbonImmutable` | 依 UTC、`TZID`、floating 或 DATE 語意解讀的 `DTSTART`。 |
+| `startIsDate` | `bool` | `DTSTART` 是否使用 `VALUE=DATE`。 |
+| `startIsFloating` | `bool` | `DTSTART` 是否為 DATE，或沒有 `TZID`／`Z` 的 DATE-TIME。 |
+| `duration` | `?DateInterval` | 明確提供或由邊界推導的有效 duration。 |
 | `timestamp`, `createdAt`, `lastModifiedAt` | `?CarbonImmutable` | `DTSTAMP`、`CREATED`、`LAST-MODIFIED`。 |
-| `status`, `classification` | `?string` | 大寫 `STATUS`、`CLASS`。 |
-| `priority`, `sequence` | `?int` | 數值 metadata。 |
-| `organizer` | `?Organizer` | 事件主辦人資料。 |
-| `attendees` | `Collection<int, Attendee>` | 所有 attendees。 |
-| `alarms` | `Collection<int, Alarm>` | Direct `VALARM`。 |
-| `categories` | `Collection<int, string>` | 所有 category values。 |
+| `classification`, `status` | `?string` | 大寫的來源 `CLASS`、`STATUS` token。 |
+| `priority`, `sequence` | `?int` | 整數 metadata。 |
+| `recurrenceId` | `?CarbonImmutable` | `RECURRENCE-ID`。 |
+| `recurrenceIdIsDate`, `recurrenceIdIsFloating` | `bool` | `RECURRENCE-ID` 的來源 value type 與 floating flags。 |
+| `organizer` | `?Organizer` | 主辦人地址與 parameters。 |
+| `attendees` | `Collection<int, Attendee>` | 依文件順序保留的所有 `ATTENDEE`。 |
+| `alarms` | `Collection<int, Alarm>` | Direct `VALARM` children。 |
+| `categories` | `Collection<int, string>` | 依順序展平的 `CATEGORIES` text-list values。 |
+| `geo` | `?array{latitude: float, longitude: float}` | 合法範圍內的 `GEO`；格式或範圍無效時為 `null`。 |
+| `comments`, `contacts` | `Collection<int, string>` | 每個重複 `COMMENT`／`CONTACT` 對應一個字串。 |
+| `resources` | `Collection<int, string>` | 依順序展平的 `RESOURCES` text-list values。 |
+| `recurrenceRule` | `?Property` | 第一個 `RRULE`，包含 values、parameters 與 raw text。 |
+| `attachments` | `Collection<int, Property>` | 所有 `ATTACH`。 |
+| `exceptionDates` | `Collection<int, Property>` | 所有 `EXDATE`。 |
+| `requestStatuses` | `Collection<int, Property>` | 所有 `REQUEST-STATUS`。 |
+| `relatedTo` | `Collection<int, Property>` | 所有 `RELATED-TO`。 |
+| `recurrenceDates` | `Collection<int, Property>` | 所有 `RDATE`。 |
 
-## 時間與 duration 注意事項
+Convenience 欄位不會移除 generic properties。例如無效的 typed `geo` 仍能透過
+`property('GEO')` 取得原始資料。
 
-UTC 與可識別的 `TZID` 會保留時區；沒有時區的日期時間會使用設定的時區。無法識別
-`TZID` 時會加入 warning，對應的日期欄位會是 `null`，但仍可從 Property 取得原值。
-`DTEND` 是 exclusive；全天 `lastDay` 為結束前一個 calendar day。沒有 `DTEND` 的
-全天事件隱含一天。事件提供結束時間或可用 duration 時可取得 `endsAt`；提供足夠的
-開始／結束或 duration 資料時可取得 `duration`。
+## Event 專屬欄位
 
-PHP 的 `DateInterval` 可以被修改；若需保留事件原值，修改前請先複製。
+| 欄位 | 型別 | 可取得的資料 |
+| --- | --- | --- |
+| `endsAt` | `?CarbonImmutable` | Exclusive `DTEND`，或依 duration／全天規則推導的結束。 |
+| `endIsDate`, `endIsFloating` | `bool` | 明確或推導結束值的 value type 與 floating flags。 |
+| `allDay` | `bool` | `DTSTART` 是否使用 `VALUE=DATE`；與 `isAllDay()` 相同。 |
+| `lastDay` | `?CarbonImmutable` | 全天事件 inclusive 最後日期。 |
+| `transparency` | `?string` | 大寫的來源 `TRANSP` token；缺少時維持 `null`。 |
 
-## 範圍查詢
+不要用午夜或 24 小時 duration 推測全天事件；請使用 `allDay`、`startIsDate` 或
+`isAllDay()`。
+
+## Todo 專屬欄位
+
+| 欄位 | 型別 | 可取得的資料 |
+| --- | --- | --- |
+| `completedAt` | `?CarbonImmutable` | UTC `COMPLETED`。 |
+| `dueAt` | `?CarbonImmutable` | 明確 `DUE`，或 `DTSTART + DURATION`。 |
+| `dueIsDate`, `dueIsFloating` | `bool` | 來自 `DUE`，或 due 為推導值時繼承 `DTSTART`。 |
+| `percentComplete` | `?int` | `PERCENT-COMPLETE`。 |
+
+Todo 沒有隱含的一日 duration；`DTSTART`、`DUE`、`DURATION` 資料不足時，`dueAt` 與
+`duration` 會是 `null`。
+
+## 日期與 duration 行為
+
+- UTC 會保留 UTC；可識別的 `TZID` 會保留該時區。
+- Floating DATE-TIME 使用 `Calendar::$floatingTimezone`。
+- 文件內無法識別的 `TZID` 會產生 warning，typed 日期欄位為 `null`，原始 Property 仍保留。
+- `DTEND` 是 exclusive；全天 `lastDay` 比 `endsAt` 早一個 calendar day。
+- 沒有 `DTEND` 的全天 Event 隱含一個 calendar day 結束。
+- 推導的 Event end flags 與 Todo due flags 會繼承 start flags。
+- `RECURRENCE-ID` flags 只描述該 property 本身。
+- PHP 的 `DateInterval` 可被修改；需要保留值時請先 clone。
+
+Recurrence properties 會解析並保留，但不會展開 occurrences。
+
+## Event 範圍查詢
 
 ```php
 $events = $calendar->eventsBetween($from, $until);
 ```
 
-兩個參數都是 `DateTimeInterface`；`$from` 必須早於 `$until`，否則會拋出
-`InvalidArgumentException`。剛好從 `$until` 開始的事件不會包含在結果中；沒有可用
-開始時間的事件也不會納入。此方法不展開重複規則，只回傳 `.ics` 內實際存在的事件。
+兩個邊界都接受 `DateTimeInterface`。範圍採 half-open：包含 `$from`，不包含剛好從
+`$until` 開始的事件。`$from` 必須早於 `$until`，否則拋出 `InvalidArgumentException`。
+沒有可用 start 的事件會被排除，而且只回傳行事曆中實際存在的 VEVENT components。

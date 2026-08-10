@@ -1,12 +1,19 @@
 # 開始使用
 
-## 套件代表的資料模型
+Laravel iCalendar Reader 會讀取並驗證既有 `.ics` 內容，讓應用程式透過可查詢的
+`Calendar` 取得事件、待辦、日期、參與者、提醒及每一個 direct property。套件只負責
+讀取：不產生 `.ics`、不擷取 URL、不同步 CalDAV、不持久化行事曆，也不把 recurrence
+rule 展開成 occurrences。
 
-套件會將 `.ics` 內容轉成 `Calendar` 物件，讓你取得行事曆資訊、事件、日期、參與者、
-提醒、properties 與非事件 components，不必自行閱讀 iCalendar 文字內容。
+## 系統需求
 
-它只負責讀取，不產生 `.ics`、不下載 URL、不同步 CalDAV、不儲存資料，也不將
-recurrence rule 展開成 occurrences。
+| 需求 | 宣告支援 | CI 持續實測 |
+| --- | --- | --- |
+| PHP | PHP 8.x 系列的 8.3 以上版本 | 8.3、8.4、8.5 |
+| Laravel | 11、12、13 | 11、12、13 |
+
+Composer 會一併安裝 Carbon 3 與 Sabre/VObject 5。不需要資料庫、migration、外部服務或
+額外的 PHP extension。
 
 ## 安裝
 
@@ -14,43 +21,53 @@ recurrence rule 展開成 occurrences。
 composer require mattmy/laravel-icalendar-reader
 ```
 
-## 30 秒範例
+安裝完成後即可使用套件。
+
+## 設定
+
+套件可直接使用預設值：
+
+- `max_bytes`：每次最多接受 10 MiB 輸入。
+- `floating_timezone`：預設為 `null`，沒有時區的 date-time 使用 `app.timezone`。
+
+只有需要調整時才發布 `config/icalendar_reader.php`：
+
+```bash
+php artisan vendor:publish --tag=icalendar-reader-config
+```
+
+時區 fallback 與無效設定的處理方式請看[驗證與設定](/zh-TW/guide/validation-and-configuration)。
+
+## 快速開始
 
 ```php
 use Mattmy\ICalendar\Facades\ICalendar;
 
-$calendar = ICalendar::fromUploadedFile($request->file('calendar'));
+$calendar = ICalendar::read(<<<'ICS'
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Calendar//EN
+BEGIN:VEVENT
+UID:meeting@example.test
+DTSTAMP:20260803T000000Z
+DTSTART:20260810T090000Z
+SUMMARY:Project meeting
+END:VEVENT
+END:VCALENDAR
+ICS);
 
-foreach ($calendar->events() as $event) {
-    echo $event->summary;
+$event = $calendar->events()->sole();
 
-    if ($event->allDay) {
-        echo $event->lastDay?->toDateString();
-    }
-}
+echo $event->summary; // Project meeting
+echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
 
-`allDay` 與 `isAllDay()` 的結果相同。午夜開始或持續 24 小時不一定代表全天事件，
-請直接使用這兩者之一，不要依時間自行推測。
+所有讀取方法都回傳相同的 `Calendar` 類型。Collections 保留文件順序；缺少的 optional
+資料會是 `null` 或空 Collection，不會產生不存在的預設資料。
 
-## Dependency injection 或 facade
+## 下一步
 
-```php
-final class ImportCalendar
-{
-    public function __construct(private \Mattmy\ICalendar\Reader $reader) {}
-
-    public function __invoke(string $contents): void
-    {
-        $calendar = $this->reader->read($contents);
-    }
-}
-```
-
-兩種寫法都會取得相同的行事曆資料。應用程式原本就使用依賴注入時可選 `Reader`，
-希望呼叫簡短時可使用 facade。
-
-下一步可閱讀[如何讀取 `.ics` 與處理錯誤](/zh-TW/guide/reading-input)、
-[Calendar 與 Event](/zh-TW/guide/calendars-and-events)、
-[取得 properties 與非事件資料](/zh-TW/guide/properties-and-components)，以及處理大型檔案前
-必讀的[效能與安全](/zh-TW/guide/performance-and-security)。
+- [選擇輸入方式與錯誤策略](/zh-TW/guide/reading-input)。
+- [查詢 Calendar、Event 與 Todo](/zh-TW/guide/calendars-and-events)。
+- [讀取 properties 與非事件 components](/zh-TW/guide/properties-and-components)。
+- [處理大型匯入前查看效能與安全](/zh-TW/guide/performance-and-security)。

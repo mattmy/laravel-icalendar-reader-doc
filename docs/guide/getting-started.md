@@ -1,61 +1,74 @@
 # Getting started
 
-## What the package represents
+Laravel iCalendar Reader reads and validates existing `.ics` content, then gives your
+application a queryable `Calendar` with events, todos, dates, participants, alarms, and every
+direct property. It is a reader only: it does not generate `.ics`, fetch URLs, synchronize
+CalDAV, persist calendars, or expand recurrence rules into occurrences.
 
-The package turns `.ics` content into a `Calendar` object. You can read calendar metadata,
-events, dates, attendees, alarms, properties, and non-event components without navigating
-the iCalendar text yourself.
+## Requirements
 
-It is a reader only. It does not generate `.ics`, download URLs, synchronize CalDAV,
-persist calendars, or expand recurrence rules into occurrences.
+| Requirement | Declared support | Continuously tested |
+| --- | --- | --- |
+| PHP | 8.3 or later in the PHP 8.x series | 8.3, 8.4, 8.5 |
+| Laravel | 11, 12, 13 | 11, 12, 13 |
 
-## Install
+Composer installs Carbon 3 and Sabre/VObject 5 with the package. No database, migration,
+external service, or optional PHP extension is required.
+
+## Installation
 
 ```bash
 composer require mattmy/laravel-icalendar-reader
 ```
 
-## Thirty-second example
+After installation, the package is ready to use.
+
+## Configuration
+
+The package works with defaults immediately:
+
+- `max_bytes` accepts up to 10 MiB per input.
+- `floating_timezone` is `null`, so date-times without a timezone use `app.timezone`.
+
+Publish `config/icalendar_reader.php` only when you need to change those values:
+
+```bash
+php artisan vendor:publish --tag=icalendar-reader-config
+```
+
+See [Validation and configuration](/guide/validation-and-configuration) for timezone fallback
+rules and invalid configuration behavior.
+
+## Quick start
 
 ```php
 use Mattmy\ICalendar\Facades\ICalendar;
 
-$calendar = ICalendar::fromUploadedFile($request->file('calendar'));
+$calendar = ICalendar::read(<<<'ICS'
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Calendar//EN
+BEGIN:VEVENT
+UID:meeting@example.test
+DTSTAMP:20260803T000000Z
+DTSTART:20260810T090000Z
+SUMMARY:Project meeting
+END:VEVENT
+END:VCALENDAR
+ICS);
 
-foreach ($calendar->events() as $event) {
-    echo $event->summary;
+$event = $calendar->events()->sole();
 
-    if ($event->allDay) {
-        echo $event->lastDay?->toDateString();
-    }
-}
+echo $event->summary; // Project meeting
+echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
 
-`allDay` and `isAllDay()` return the same result. A midnight or 24-hour event is not
-necessarily an all-day event, so use either member instead of inferring it from the time.
-
-## Dependency injection or facade
-
-```php
-use Mattmy\ICalendar\Reader;
-
-final class ImportCalendar
-{
-    public function __construct(private Reader $reader) {}
-
-    public function __invoke(string $contents): void
-    {
-        $calendar = $this->reader->read($contents);
-    }
-}
-```
-
-Both styles return the same calendar data. Use dependency injection when your application
-already injects services, or the facade for shorter calls.
+Every read method returns the same `Calendar` type. Collections preserve document order, and
+missing optional values are `null` or empty collections rather than invented defaults.
 
 ## Next steps
 
-- [Choose how to read `.ics` content and handle errors](/guide/reading-input).
-- [Understand dates, events, and UID queries](/guide/calendars-and-events).
-- [Read properties and non-event data](/guide/properties-and-components).
-- [Review performance before processing large files](/guide/performance-and-security).
+- [Choose an input method and error strategy](/guide/reading-input).
+- [Query calendars, events, and todos](/guide/calendars-and-events).
+- [Read properties and non-event components](/guide/properties-and-components).
+- [Review performance and security before large imports](/guide/performance-and-security).

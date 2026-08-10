@@ -1,52 +1,57 @@
 # API reference
 
-This page is a quick list of the methods you can use. Follow the links when you need examples,
-parameter details, or error behavior.
+This page lists the package's public operations. The linked guides explain semantics and
+errors; public readonly fields are documented in the guide for each object.
 
 ## Read a calendar
 
+The facade and injected `Reader` expose the same methods:
+
 ```php
-ICalendar::read(string $contents): Calendar
-ICalendar::tryRead(string $contents): ?Calendar
-ICalendar::fromPath(string $path): Calendar
-ICalendar::tryFromPath(string $path): ?Calendar
-ICalendar::fromStream(mixed $stream): Calendar
-ICalendar::tryFromStream(mixed $stream): ?Calendar
-ICalendar::fromUploadedFile(UploadedFile $file): Calendar
-ICalendar::tryFromUploadedFile(UploadedFile $file): ?Calendar
+read(string $contents): Calendar
+tryRead(string $contents): ?Calendar
+fromPath(string $path): Calendar
+tryFromPath(string $path): ?Calendar
+fromStream(mixed $stream): Calendar
+tryFromStream(mixed $stream): ?Calendar
+fromUploadedFile(UploadedFile $file): Calendar
+tryFromUploadedFile(UploadedFile $file): ?Calendar
 ```
 
-- `read()` / `tryRead()` read the complete `.ics` text in `$contents`.
-- `fromPath()` / `tryFromPath()` read a local `.ics` file at `$path`.
-- `fromStream()` / `tryFromStream()` read from the current position of `$stream`.
+- `read()` / `tryRead()` read a complete iCalendar string.
+- `fromPath()` / `tryFromPath()` read a local regular file.
+- `fromStream()` / `tryFromStream()` read from a stream's current position.
 - `fromUploadedFile()` / `tryFromUploadedFile()` read a Laravel uploaded file.
-- A `try*()` method returns `null` for invalid iCalendar content. Its matching non-`try`
-  method throws `InvalidCalendar`.
 
-See [Reading input](/guide/reading-input) for source errors and examples.
+A `try*()` method returns `null` only for invalid iCalendar content. See
+[Reading input](/guide/reading-input) for source behavior and exceptions.
 
-## Get calendar data
+## Query events, todos, and warnings
 
 ```php
 $calendar->events(?string $uid = null): Collection
 $calendar->hasEvents(?string $uid = null): bool
 $calendar->event(string $uid): ?Event
+$calendar->todos(?string $uid = null): Collection
+$calendar->hasTodos(?string $uid = null): bool
+$calendar->todo(string $uid): ?Todo
 $calendar->eventsBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->warnings(): Collection
 ```
 
-- `events()` gets all events, or only events with `$uid`.
-- `hasEvents()` checks whether the calendar has any event, or an event with `$uid`.
-- `event()` gets one event with `$uid`.
-- `eventsBetween()` gets events that overlap the period from `$from` up to, but not including,
-  `$until`.
-- `warnings()` gets problems that did not stop the calendar from being read.
+- `events()` and `todos()` return all components, or every exact UID match, in document order.
+- `hasEvents()` and `hasTodos()` test whether any component or UID match exists.
+- `event()` and `todo()` return one exact UID match or `null`.
+- `eventsBetween()` returns events overlapping the requested half-open interval.
+- `warnings()` returns issues that did not prevent a result.
 
-UID matching is case-sensitive. See [Calendars and events](/guide/calendars-and-events).
+UID matching is case-sensitive. Singular UID lookup prefers the recurrence master when one
+is present. `eventsBetween()` uses a half-open interval and does not expand recurrence rules.
+See [Calendars, events, and todos](/guide/calendars-and-events).
 
-## Get properties
+## Query properties
 
-The same property methods are available on `Calendar`, `Event`, and `Component`:
+`Calendar`, `Event`, `Todo`, and `Component` expose:
 
 ```php
 $object->properties(?string $name = null): Collection
@@ -54,14 +59,29 @@ $object->hasProperty(?string $name = null): bool
 $object->property(string $name): ?Property
 ```
 
-- `properties()` gets all properties, or all properties named `$name`.
-- `hasProperty()` checks for any property, or a property named `$name`.
-- `property()` gets the first property named `$name`.
+`Property` and participant objects expose:
 
-Property names are not case-sensitive. These methods only check properties directly inside
-the current object. See [Properties and components](/guide/properties-and-components).
+```php
+$property->parameters(): array
+$property->parameter(string $name): string|array|null
+$property->rawValue(): string
+$property->toArray(): array
+$organizer->parameters(): array
+$attendee->parameters(): array
+```
 
-## Get components
+- `properties()` returns all direct properties or every name match.
+- `hasProperty()` tests whether any direct property or name match exists.
+- `property()` returns the first name match or `null`.
+- `parameters()` returns all parameters without dropping multi-value entries.
+- `parameter()` returns one parameter, an array for a multi-value parameter, or `null`.
+- `rawValue()` returns the property's text value.
+- `Property::toArray()` returns the complete serializable property representation.
+
+Names are case-insensitive and direct lookup does not recurse. See
+[Properties and components](/guide/properties-and-components).
+
+## Query components
 
 ```php
 $calendar->components(?string $name = null): Collection
@@ -70,30 +90,13 @@ $calendar->component(string $name): ?Component
 $component->components(?string $name = null): Collection
 ```
 
-- `components()` gets all child components, or all child components named `$name`.
-- `hasComponent()` checks whether the Calendar has any child component, or one named `$name`.
-- `component()` gets the first Calendar child component named `$name`.
+- `components()` returns all direct children or every name match.
+- `hasComponent()` tests whether the Calendar has any direct child or name match.
+- `component()` returns the Calendar's first name match or `null`.
 
-Component names are not case-sensitive. These methods only check direct children.
+Component names are case-insensitive and only direct children are examined.
 
-## Get property values and parameters
-
-```php
-$property->parameters(): array
-$property->parameter(string $name): string|array|null
-$property->rawValue(): string
-$organizer->parameters(): array
-$attendee->parameters(): array
-```
-
-- `parameters()` gets all parameters attached to the property, organizer, or attendee.
-- `parameter()` gets one parameter by name. It returns an array when that parameter has
-  multiple values.
-- `rawValue()` gets the property's value as text.
-
-Parameter names are not case-sensitive.
-
-## Check an event or alarm trigger
+## Event and alarm helpers
 
 ```php
 $event->isAllDay(): bool
@@ -104,14 +107,14 @@ $trigger->dateTime(): ?CarbonImmutable
 $trigger->relatedTo(): ?string
 ```
 
-- `isAllDay()` tells you whether the event is an all-day event.
-- `isRelative()` tells you whether the reminder is set before or after the event.
-- `isAbsolute()` tells you whether the reminder uses a specific date and time.
-- `duration()` gets the amount of time before or after the event.
-- `dateTime()` gets the reminder's specific date and time.
-- `relatedTo()` returns `START` or `END` for a relative reminder.
+- `isAllDay()` reports whether `DTSTART` uses the DATE value type.
+- `isRelative()` and `isAbsolute()` identify the trigger form.
+- `duration()` returns a relative trigger offset or `null`.
+- `dateTime()` returns an absolute trigger time or `null`.
+- `relatedTo()` returns `START`, `END`, or `null` for an absolute trigger.
 
-See [Participants and alarms](/guide/participants-and-alarms).
+See [Participants and alarms](/guide/participants-and-alarms) for relative and absolute
+trigger behavior.
 
 ## Convert or access complete data
 
@@ -122,17 +125,18 @@ $calendar->toJson(int $options = 0): string
 $calendar->toComponentArray(): array
 $calendar->rawComponent(): VCalendar
 $event->rawComponent(): VEvent
+$todo->rawComponent(): VTodo
 $component->rawComponent(): SabreComponent
 ```
 
-- `toArray()` and `jsonSerialize()` get common calendar and event data as an array.
-- `toJson()` gets the same data as JSON. `$options` accepts PHP `json_encode()` options.
-- `toComponentArray()` gets the complete property and component tree as an array.
-- `rawComponent()` gets the Sabre component when you need data not covered by other methods.
+- `toArray()` and `jsonSerialize()` return Calendar, Event, Todo, and warning data.
+- `toJson()` JSON-encodes that data with the supplied PHP options.
+- `toComponentArray()` returns the complete property and component tree.
+- Each `rawComponent()` returns an independent Sabre component for advanced use.
 
 See [Arrays and JSON](/guide/arrays-and-json).
 
-## Get issue details
+## Inspect issues
 
 ```php
 $issue->toArray(): array
@@ -140,7 +144,7 @@ $issue->jsonSerialize(): array
 $exception->issues(): Collection
 ```
 
-- `CalendarIssue::toArray()` and `jsonSerialize()` get one warning or error as an array.
-- `InvalidCalendar::issues()` gets the reasons why the `.ics` content was rejected.
+- `CalendarIssue::toArray()` and `jsonSerialize()` return one issue's seven fields.
+- `InvalidCalendar::issues()` returns every reason the content was rejected.
 
 See [Validation and configuration](/guide/validation-and-configuration).

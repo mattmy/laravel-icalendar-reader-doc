@@ -1,37 +1,57 @@
 # 參與者與提醒
 
+Event 與 Todo 都提供 typed organizer、attendees 與巢狀 alarms。
+
 ## Organizer
 
-`Organizer` 代表一個 `ORGANIZER` property。`address` 是包含 `mailto:` 的原始
-cal-address；`email` 是移除大小寫不敏感 `mailto:` 後的地址，否則為 `null`；
-`name`、`sentBy`、`directory` 分別來自 `CN`、`SENT-BY`、`DIR`。
-`parameters()` 回傳 `ORGANIZER` 上的所有 parameters。
+`Organizer` 代表一個 `ORGANIZER` property。
+
+| Member | 型別 | 意義 |
+| --- | --- | --- |
+| `address` | `string` | 原始 cal-address；存在時包含 `mailto:`。 |
+| `email` | `?string` | 移除大小寫不敏感的 `mailto:`；無法轉換時為 `null`。 |
+| `name` | `?string` | `CN` parameter。 |
+| `sentBy` | `?string` | `SENT-BY` parameter。 |
+| `directory` | `?string` | `DIR` parameter。 |
+| `parameters()` | `array<string,string\|list<string>>` | 包含未知值在內的全部 parameters。 |
 
 ## Attendee
 
-`Attendee` 代表一個重複的 `ATTENDEE`，不會依 address 合併。
+`Attendee` 代表一個可重複的 `ATTENDEE` property，不會依 address 合併。
 
-| Member | 型別／意義 |
-| --- | --- |
-| `address`, `email`, `name` | 原始地址、email、顯示名稱。 |
-| `role`, `status`, `type` | 大寫 `ROLE`、`PARTSTAT`、`CUTYPE`。 |
-| `rsvp` | `?bool`；缺少或無法識別時 `null`。 |
-| `delegatedFrom`, `delegatedTo` | `Collection<int,string>`，所有 delegation addresses。 |
-| `parameters()` | `ATTENDEE` 上的所有 parameters。 |
+| Member | 型別 | 意義 |
+| --- | --- | --- |
+| `address` | `string` | 原始 cal-address。 |
+| `email`, `name` | `?string` | 正規化 email 與 `CN` 顯示名稱。 |
+| `role`, `status`, `type` | `?string` | 大寫 `ROLE`、`PARTSTAT`、`CUTYPE`。 |
+| `rsvp` | `?bool` | `TRUE`、`FALSE`；缺少或無法識別時為 `null`。 |
+| `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | 全部 delegation addresses。 |
+| `parameters()` | `array<string,string\|list<string>>` | 包含未知值在內的全部 parameters。 |
 
-## Alarm 與 AlarmTrigger
+## Alarm 與 trigger
 
-`Alarm` 代表事件中的提醒。`action`、`description`、`summary` 是提醒提供的內容；
-`attendees` 是提醒的參與者；`repeat` 是重複次數；`duration` 是每次重複之間的時間。
+每個 `Alarm` 代表 Event 或 Todo 裡的一個 `VALARM`。
+
+| Member | 型別 | 意義 |
+| --- | --- | --- |
+| `action` | `?string` | `ACTION`。 |
+| `trigger` | `?AlarmTrigger` | 相對或絕對 `TRIGGER`；缺少或不合法時為 `null`。 |
+| `description`, `summary` | `?string` | 提醒文字。 |
+| `attendees` | `Collection<int, Attendee>` | 依文件順序保留的重複 alarm attendees。 |
+| `repeat` | `?int` | `REPEAT` 次數。 |
+| `duration` | `?DateInterval` | 每次重複之間的時間。 |
 
 ```php
-$trigger->isRelative(); // bool
-$trigger->isAbsolute(); // bool
-$trigger->duration();   // ?DateInterval：事件前後的相對時間
-$trigger->dateTime();   // ?CarbonImmutable
-$trigger->relatedTo();  // START、END，absolute 時為 null
+$trigger = $event->alarms->first()?->trigger;
+
+$trigger?->isRelative(); // ?bool
+$trigger?->isAbsolute(); // ?bool
+$trigger?->duration();   // ?DateInterval
+$trigger?->dateTime();   // ?CarbonImmutable
+$trigger?->relatedTo();  // START、END 或 null
 ```
 
-相對提醒可由 `duration()` 取得事件開始或結束前後的時間，並由 `relatedTo()` 得知是以
-開始或結束為基準；絕對提醒可由 `dateTime()` 取得提醒日期時間。若 `trigger` 為 `null`，
-需要原始值時可查詢 Alarm 的 properties。
+相對 trigger 的 `duration()` 是 Event 或 Todo 對應邊界前後的偏移量，`relatedTo()`
+表示開始或結束；absolute trigger 則由 `dateTime()` 提供提醒時間。若 typed trigger 為
+`null` 且需要原始值，請從上層 Event 或 Todo 的 generic properties 或 raw component
+檢查。
