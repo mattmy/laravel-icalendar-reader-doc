@@ -11,8 +11,17 @@ dates, participants, alarms, recurrence data, properties, and components.
 | PHP | 8.3 or later in the PHP 8.x series | 8.3, 8.4, 8.5 |
 | Laravel | 11, 12, 13 | 11, 12, 13 |
 
-Composer installs Carbon 3 and Sabre/VObject 5 with the package. No database, migration,
-external service, or optional PHP extension is required.
+Required PHP extensions:
+
+- DOM (`ext-dom`)
+- JSON (`ext-json`)
+- Multibyte String (`ext-mbstring`)
+- XMLReader (`ext-xmlreader`)
+- XMLWriter (`ext-xmlwriter`)
+
+Composer also requires libxml 2.6.20 or later through the `lib-libxml` platform package.
+These requirements come from Sabre/VObject 5 and Sabre/XML. No database, migration, or
+external service is required.
 
 ## Installation
 

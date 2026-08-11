@@ -26,6 +26,8 @@ features:
 
 - PHP 8.3 以上的 PHP 8.x 版本
 - Laravel 11、12 或 13
+- PHP extensions：DOM、JSON、Multibyte String、XMLReader、XMLWriter
+- libxml 2.6.20 以上版本
 
 CI 目前實測 PHP 8.3–8.5 與 Laravel 11–13。請從[開始使用](/zh-TW/guide/getting-started)
 查看安裝、設定與可執行範例。英文文件是權威版本。

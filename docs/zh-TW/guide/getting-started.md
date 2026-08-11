@@ -11,8 +11,16 @@ recurrence 資料、properties 與 components。
 | PHP | PHP 8.x 系列的 8.3 以上版本 | 8.3、8.4、8.5 |
 | Laravel | 11、12、13 | 11、12、13 |
 
-Composer 會一併安裝 Carbon 3 與 Sabre/VObject 5。不需要資料庫、migration、外部服務或
-額外的 PHP extension。
+必要的 PHP extensions：
+
+- DOM（`ext-dom`）
+- JSON（`ext-json`）
+- Multibyte String（`ext-mbstring`）
+- XMLReader（`ext-xmlreader`）
+- XMLWriter（`ext-xmlwriter`）
+
+Composer 也會透過 `lib-libxml` platform package 要求 libxml 2.6.20 以上版本。這些需求
+來自 Sabre/VObject 5 與 Sabre/XML；套件不需要資料庫、migration 或外部服務。
 
 ## 安裝
 
