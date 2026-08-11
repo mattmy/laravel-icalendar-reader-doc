@@ -3,12 +3,6 @@
 Choose a method based on where the `.ics` data comes from. Every successful method returns
 the same `Calendar` object.
 
-The examples use the facade:
-
-```php
-use Mattmy\ICalendar\Facades\ICalendar;
-```
-
 ## String contents
 
 ```php
@@ -71,23 +65,3 @@ Validate that the request contains a file before calling this method.
 
 Use `read*()` when you want details about invalid content. Use `try*()` when `null` is enough
 to tell your application that the user supplied an invalid calendar.
-
-## Facade or dependency injection
-
-The facade and the container-bound `Reader` expose the same methods and return the same data.
-Inject `Reader` when the surrounding application already uses constructor injection:
-
-```php
-use Mattmy\ICalendar\Calendar;
-use Mattmy\ICalendar\Reader;
-
-final class ImportCalendar
-{
-    public function __construct(private Reader $reader) {}
-
-    public function handle(string $contents): Calendar
-    {
-        return $this->reader->read($contents);
-    }
-}
-```

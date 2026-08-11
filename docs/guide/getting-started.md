@@ -1,9 +1,8 @@
 # Getting started
 
-Laravel iCalendar Reader reads and validates existing `.ics` content, then gives your
-application a queryable `Calendar` with events, todos, dates, participants, alarms, and every
-direct property. It is a reader only: it does not generate `.ics`, fetch URLs, synchronize
-CalDAV, persist calendars, or expand recurrence rules into occurrences.
+Laravel iCalendar Reader reads and validates `.ics` content from strings, local files, streams,
+and Laravel uploads. It gives your application a queryable `Calendar` with events, todos,
+dates, participants, alarms, recurrence data, properties, and components.
 
 ## Requirements
 
@@ -42,8 +41,6 @@ rules and invalid configuration behavior.
 ## Quick start
 
 ```php
-use Mattmy\ICalendar\Facades\ICalendar;
-
 $calendar = ICalendar::read(<<<'ICS'
 BEGIN:VCALENDAR
 VERSION:2.0

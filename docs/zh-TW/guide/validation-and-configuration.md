@@ -8,7 +8,6 @@
 
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
-use Mattmy\ICalendar\Facades\ICalendar;
 
 try {
     $calendar = ICalendar::read($contents);

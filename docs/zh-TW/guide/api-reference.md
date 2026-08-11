@@ -5,7 +5,7 @@
 
 ## 讀取行事曆
 
-Facade 與注入的 `Reader` 提供相同方法：
+`ICalendar` 提供以下輸入方法：
 
 ```php
 read(string $contents): Calendar

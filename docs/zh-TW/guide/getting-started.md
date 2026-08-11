@@ -1,9 +1,8 @@
 # 開始使用
 
-Laravel iCalendar Reader 會讀取並驗證既有 `.ics` 內容，讓應用程式透過可查詢的
-`Calendar` 取得事件、待辦、日期、參與者、提醒及每一個 direct property。套件只負責
-讀取：不產生 `.ics`、不擷取 URL、不同步 CalDAV、不持久化行事曆，也不把 recurrence
-rule 展開成 occurrences。
+Laravel iCalendar Reader 可從字串、本機檔案、stream 與 Laravel 上傳檔案讀取並驗證
+`.ics` 內容，讓應用程式透過可查詢的 `Calendar` 取得事件、待辦、日期、參與者、提醒、
+recurrence 資料、properties 與 components。
 
 ## 系統需求
 
@@ -41,8 +40,6 @@ php artisan vendor:publish --tag=icalendar-reader-config
 ## 快速開始
 
 ```php
-use Mattmy\ICalendar\Facades\ICalendar;
-
 $calendar = ICalendar::read(<<<'ICS'
 BEGIN:VCALENDAR
 VERSION:2.0

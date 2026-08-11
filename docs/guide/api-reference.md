@@ -5,7 +5,7 @@ errors; public readonly fields are documented in the guide for each object.
 
 ## Read a calendar
 
-The facade and injected `Reader` expose the same methods:
+`ICalendar` provides these input methods:
 
 ```php
 read(string $contents): Calendar

@@ -2,12 +2,6 @@
 
 請依 `.ics` 資料來源選擇方法；任何方法成功後都會回傳相同的 `Calendar` 物件。
 
-以下範例使用 facade：
-
-```php
-use Mattmy\ICalendar\Facades\ICalendar;
-```
-
 ## 字串
 
 ```php
@@ -69,23 +63,3 @@ $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 
 想知道內容不合法的原因時使用 `read*()`；只需要知道使用者提供的行事曆無效時，
 使用會回傳 `null` 的 `try*()`。
-
-## Facade 或 dependency injection
-
-Facade 與 container 中的 `Reader` 提供相同方法，也會回傳相同資料。應用程式原本使用
-constructor injection 時可以注入 `Reader`：
-
-```php
-use Mattmy\ICalendar\Calendar;
-use Mattmy\ICalendar\Reader;
-
-final class ImportCalendar
-{
-    public function __construct(private Reader $reader) {}
-
-    public function handle(string $contents): Calendar
-    {
-        return $this->reader->read($contents);
-    }
-}
-```
