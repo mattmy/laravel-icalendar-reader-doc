@@ -37,9 +37,6 @@ $object->property('SUMMARY');
 `DateInterval` 或 RRULE map 等 structured array。`rawValue()` 不包含 property name、
 parameters 或原始折行格式。
 
-`Property::toArray()` 回傳 `name`、`type`、`value`、`values`、`parameters` 與
-`raw_value`，適合用於 API 回傳 generic property。
-
 ## Component 查詢
 
 `Calendar` 以 `components(?string $name = null)`、`hasComponent(?string $name = null)`、

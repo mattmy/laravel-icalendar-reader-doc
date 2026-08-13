@@ -35,6 +35,9 @@ normal PHP `json_encode()` options and throws `JsonException` if conversion fail
 `Calendar::toComponentArray()` recursively returns each component's `name`, `properties`,
 and `components`. It preserves repeated, unknown, vendor, and non-event data.
 
+Calling `occurrencesBetween()` does not add an `occurrences` key to Calendar array or JSON
+output. Use the returned Event collection directly when you need expanded instances.
+
 Use `toArray()` for convenient Calendar, Event, and Todo data. Use
 `toComponentArray()` when the complete component tree matters. Neither recreates the original
 `.ics` bytes: line folding, casing, newline style, and byte formatting are not retained.

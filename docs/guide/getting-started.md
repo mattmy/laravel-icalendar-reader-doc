@@ -29,8 +29,6 @@ external service is required.
 composer require mattmy/laravel-icalendar-reader
 ```
 
-After installation, the package is ready to use.
-
 ## Configuration
 
 The package works with defaults immediately:

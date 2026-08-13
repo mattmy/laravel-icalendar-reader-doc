@@ -74,3 +74,5 @@ return [
 | `CalendarTooLarge` | 實際輸入超過 `max_bytes`。 |
 | `InvalidCalendarSource` | Resource type、stream mode 或 upload 不合法。 |
 | `InvalidConfiguration` | `max_bytes` 無法安全使用。 |
+| `UnsupportedRecurrence` | 合法 recurrence series 無法被安全展開。 |
+| `RecurrenceLimitExceeded` | Occurrence 查詢評估超過 3,500 個 candidates；請縮小範圍。 |

@@ -7,12 +7,15 @@
 - The complete accepted calendar remains in memory, including when it comes from a path,
   stream, or upload.
 - Repeated calls to `events()`, `todos()`, UID lookups, `properties()`, `components()`, or
-  `eventsBetween()` over large calendars add work. Keep and reuse results when possible.
+  range queries over large calendars add work. Keep and reuse results when possible.
 - `toArray()`, `toJson()`, and especially `toComponentArray()` create complete output data.
   Avoid producing multiple formats for the same large calendar unless required.
 - `rawComponent()` can be expensive for large calendars. Call it once and reuse the result.
-- Recurrence rules are not expanded, so the package only returns event and todo components
-  actually present in the `.ics` file.
+- `occurrencesBetween()` materializes its result and does not cache it. One query may evaluate at
+  most 3,500 occurrence candidates across all series; exceeding the limit throws
+  `RecurrenceLimitExceeded` without returning partial results. Use the narrowest practical range.
+- `eventsBetween()` and todo queries do not expand recurrence; they only return components stored
+  in the `.ics` file.
 
 The bundled benchmark is not a production capacity promise. Test with your largest real-world
 calendars before selecting request, queue, and memory limits.

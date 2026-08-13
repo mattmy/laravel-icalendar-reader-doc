@@ -36,6 +36,7 @@ $calendar->todos(?string $uid = null): Collection
 $calendar->hasTodos(?string $uid = null): bool
 $calendar->todo(string $uid): ?Todo
 $calendar->eventsBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
+$calendar->occurrencesBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->warnings(): Collection
 ```
 
@@ -43,10 +44,14 @@ $calendar->warnings(): Collection
 - `hasEvents()` 與 `hasTodos()` 判斷是否存在任一 component 或 UID match。
 - `event()` 與 `todo()` 回傳一筆完全符合 UID 的資料，找不到時為 `null`。
 - `eventsBetween()` 回傳與指定 half-open interval 重疊的 events。
+- `occurrencesBetween()` 回傳與相同範圍重疊的非重複事件及展開後 recurrence occurrences。
 - `warnings()` 回傳未阻止產生結果的 issues。
 
 UID 比對區分大小寫；有 recurrence master 時，singular UID lookup 會優先回傳 master。
-`eventsBetween()` 使用 half-open interval，而且不展開 recurrence rules。詳見
+兩種範圍查詢都接受 `DateTimeInterface`（包括 Carbon）；`$from` 不早於 `$until` 時
+會拋出 `InvalidArgumentException`。`eventsBetween()` 不展開 recurrence rules；
+`occurrencesBetween()` 另可能拋出 `UnsupportedRecurrence` 或
+`RecurrenceLimitExceeded`。詳見
 [Calendar、Event 與 Todo](/zh-TW/guide/calendars-and-events)。
 
 ## 查詢 properties

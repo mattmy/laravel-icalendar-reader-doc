@@ -91,7 +91,8 @@ Todo has no implicit one-day duration. Without enough `DTSTART`, `DUE`, or `DURA
 - `RECURRENCE-ID` flags always describe that property itself.
 - `DateInterval` is mutable in PHP; clone it before changing a value you need to retain.
 
-Recurrence properties are parsed and preserved, but occurrences are not expanded.
+Recurrence properties remain available on the original Event objects. Use the occurrence query
+below when you need the concrete instances produced by those properties.
 
 ## Event range queries
 
@@ -103,3 +104,31 @@ Both boundaries accept `DateTimeInterface`. The interval is half-open: `$from` i
 an event starting exactly at `$until` is excluded. `$from` must be earlier than `$until`, or
 `InvalidArgumentException` is thrown. Events without a usable start are excluded, and only
 VEVENT components actually present in the calendar are returned.
+
+## Recurring event occurrences
+
+`occurrencesBetween()` returns the events that occur within a range: non-recurring events and
+recurring events expanded from `RRULE`, `RDATE`, `EXDATE`, overrides, and cancellations. The
+result is a start-time-sorted `Collection<int, Event>`.
+
+Pass the start and end of the query range:
+
+```php
+use Carbon\CarbonImmutable;
+
+$occurrences = $calendar->occurrencesBetween(
+    CarbonImmutable::parse('2026-08-01 00:00:00', 'Asia/Taipei'),
+    CarbonImmutable::parse('2026-09-01 00:00:00', 'Asia/Taipei'),
+);
+```
+
+Both arguments accept `DateTimeInterface`, including native `DateTime` / `DateTimeImmutable` and
+Carbon. The query uses `[from, until)`, and `$from` must be earlier than `$until`.
+
+Limitations:
+
+- Only VEVENT is expanded, not VTODO or VJOURNAL.
+- One query evaluates at most 3,500 occurrence candidates; narrow large date ranges.
+- Some recurrence combinations are unsupported, including
+  `RECURRENCE-ID;RANGE=THISANDFUTURE` and multiple `RRULE` properties.
+- Results are not added automatically to Calendar array or JSON output.

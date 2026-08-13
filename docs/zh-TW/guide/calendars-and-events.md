@@ -89,7 +89,8 @@ Todo 沒有隱含的一日 duration；`DTSTART`、`DUE`、`DURATION` 資料不�
 - `RECURRENCE-ID` flags 只描述該 property 本身。
 - PHP 的 `DateInterval` 可被修改；需要保留值時請先 clone。
 
-Recurrence properties 會解析並保留，但不會展開 occurrences。
+原始 Event 仍會保留 recurrence properties；需要這些 properties 實際產生的事件時，
+請使用下方的 occurrence 查詢。
 
 ## Event 範圍查詢
 
@@ -100,3 +101,31 @@ $events = $calendar->eventsBetween($from, $until);
 兩個邊界都接受 `DateTimeInterface`。範圍採 half-open：包含 `$from`，不包含剛好從
 `$until` 開始的事件。`$from` 必須早於 `$until`，否則拋出 `InvalidArgumentException`。
 沒有可用 start 的事件會被排除，而且只回傳行事曆中實際存在的 VEVENT components。
+
+## 重複事件 occurrences
+
+`occurrencesBetween()` 會回傳指定範圍內實際發生的事件，包括非重複事件，以及依
+`RRULE`、`RDATE`、`EXDATE`、override 和取消狀態展開後的重複事件。結果是依開始時間
+排序的 `Collection<int, Event>`。
+
+方法需要傳入查詢範圍的開始與結束時間：
+
+```php
+use Carbon\CarbonImmutable;
+
+$occurrences = $calendar->occurrencesBetween(
+    CarbonImmutable::parse('2026-08-01 00:00:00', 'Asia/Taipei'),
+    CarbonImmutable::parse('2026-09-01 00:00:00', 'Asia/Taipei'),
+);
+```
+
+兩個參數都接受 `DateTimeInterface`，可直接使用 PHP 的 `DateTime`／`DateTimeImmutable`
+或 Carbon。查詢範圍採 `[from, until)`，而且 `$from` 必須早於 `$until`。
+
+限制：
+
+- 只展開 VEVENT，不展開 VTODO 或 VJOURNAL。
+- 單次查詢最多評估 3,500 個 occurrence candidates，範圍過大時應縮小日期區間。
+- 部分 recurrence 組合不支援，例如 `RECURRENCE-ID;RANGE=THISANDFUTURE` 或多個
+  `RRULE`。
+- 查詢結果不會自動加入 Calendar 的 array 或 JSON 輸出。

@@ -12,7 +12,6 @@ $calendar = ICalendar::tryRead($contents);
 
 `$contents` is the complete iCalendar byte string, not a path or URL. `read()` returns
 `Calendar`; `tryRead()` returns `null` when the content is not a valid iCalendar document.
-Both still report size and configuration errors as exceptions.
 
 ## Local path
 
@@ -22,8 +21,6 @@ $calendar = ICalendar::tryFromPath($path);
 ```
 
 `$path` must identify an existing, readable, regular local file. URL wrappers are rejected.
-The methods may throw `CalendarFileNotFound`, `CalendarFileUnreadable`,
-`CalendarTooLarge`, or `InvalidConfiguration`; the `try` variant does not hide them.
 
 ## Stream
 
@@ -49,9 +46,8 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-`$file` is an `Illuminate\Http\UploadedFile`. It provides the `.ics` content uploaded with
-a Laravel request. Client MIME type and filename do not prove that its content is valid.
-Validate that the request contains a file before calling this method.
+`$file` must be an `Illuminate\Http\UploadedFile`. Client MIME type and filename do not prove
+that its content is valid. Validate that the request contains a file before calling this method.
 
 ## Exceptions or `null`
 

@@ -15,7 +15,7 @@ features:
   - title: Four explicit input types
     details: Read complete strings, local paths, streams, and Laravel uploaded files with enforced byte limits.
   - title: Events and todos you can use directly
-    details: Work with immutable dates, all-day and floating-time flags, participants, alarms, recurrence data, and common RFC properties.
+    details: Work with immutable dates, recurring event occurrences, all-day and floating-time flags, participants, alarms, and common RFC properties.
   - title: Keep every property
     details: Inspect repeated, unknown, multi-value, vendor, recurrence, and non-event data through Property and Component.
   - title: Validation you can act on

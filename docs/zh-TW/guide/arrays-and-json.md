@@ -34,6 +34,9 @@ PHP `json_encode()` 選項；轉換失敗會拋出 `JsonException`。
 `Calendar::toComponentArray()` 會遞迴回傳每個 component 的 `name`、`properties` 與
 `components`，保留重複、未知、vendor 與非 Event 資料。
 
+呼叫 `occurrencesBetween()` 不會在 Calendar array 或 JSON 輸出加入 `occurrences`
+key；需要展開後的 instances 時，請直接使用該方法回傳的 Event Collection。
+
 需要方便使用的 Calendar、Event 與 Todo 資料時選 `toArray()`；需要完整
 component tree 時選 `toComponentArray()`。兩者都無法還原原始 `.ics` bytes，包括
 line folding、大小寫、換行樣式與 byte formatting。

@@ -36,6 +36,7 @@ $calendar->todos(?string $uid = null): Collection
 $calendar->hasTodos(?string $uid = null): bool
 $calendar->todo(string $uid): ?Todo
 $calendar->eventsBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
+$calendar->occurrencesBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->warnings(): Collection
 ```
 
@@ -43,10 +44,15 @@ $calendar->warnings(): Collection
 - `hasEvents()` and `hasTodos()` test whether any component or UID match exists.
 - `event()` and `todo()` return one exact UID match or `null`.
 - `eventsBetween()` returns events overlapping the requested half-open interval.
+- `occurrencesBetween()` returns non-recurring events and expanded recurring occurrences
+  overlapping the same interval.
 - `warnings()` returns issues that did not prevent a result.
 
 UID matching is case-sensitive. Singular UID lookup prefers the recurrence master when one
-is present. `eventsBetween()` uses a half-open interval and does not expand recurrence rules.
+is present. Both range methods accept `DateTimeInterface`, including Carbon; they throw
+`InvalidArgumentException` when `$from` is not earlier than `$until`. `eventsBetween()` does not
+expand recurrence rules. `occurrencesBetween()` may also throw `UnsupportedRecurrence` or
+`RecurrenceLimitExceeded`.
 See [Calendars, events, and todos](/guide/calendars-and-events).
 
 ## Query properties

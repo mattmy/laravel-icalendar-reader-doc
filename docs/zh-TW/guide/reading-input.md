@@ -10,8 +10,7 @@ $calendar = ICalendar::tryRead($contents);
 ```
 
 `$contents` 是完整 iCalendar bytes，不是路徑或 URL。`read()` 回傳 `Calendar`；
-`tryRead()` 會在內容不是合法 iCalendar 文件時回傳 `null`。兩者遇到檔案過大或設定
-錯誤時仍會拋出對應例外。
+`tryRead()` 會在內容不是合法 iCalendar 文件時回傳 `null`。
 
 ## 本機路徑
 
@@ -20,9 +19,7 @@ $calendar = ICalendar::fromPath($path);
 $calendar = ICalendar::tryFromPath($path);
 ```
 
-`$path` 必須是存在、可讀的一般本機檔案，URL wrapper 會被拒絕。可能拋出
-`CalendarFileNotFound`、`CalendarFileUnreadable`、`CalendarTooLarge` 或
-`InvalidConfiguration`；`try` 版本不會隱藏這些錯誤。
+`$path` 必須是存在、可讀的一般本機檔案，URL wrapper 會被拒絕。
 
 ## Stream
 
@@ -47,9 +44,8 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-`$file` 必須是 `Illuminate\Http\UploadedFile`，用來取得 Laravel request 上傳的 `.ics`
-內容。Client MIME 與 filename 不能證明檔案內容合法。呼叫前應先驗證 request 確實包含
-檔案。
+`$file` 必須是 `Illuminate\Http\UploadedFile`。Client MIME 與 filename 不能證明檔案
+內容合法；呼叫前應先驗證 request 確實包含檔案。
 
 ## 拋出例外或回傳 `null`
 

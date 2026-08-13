@@ -15,7 +15,7 @@ features:
   - title: 四種明確輸入方式
     details: 讀取完整字串、本機路徑、stream 與 Laravel 上傳檔案，並確實限制讀取 bytes。
   - title: 可直接使用的事件與待辦
-    details: 取得 immutable 日期、全天與 floating flags、參與者、提醒、recurrence 及常用 RFC properties。
+    details: 取得 immutable 日期、重複事件 occurrences、全天與 floating flags、參與者、提醒及常用 RFC properties。
   - title: 保留每一項 property
     details: 透過 Property 與 Component 取得重複、未知、多值、廠商、recurrence 與非事件資料。
   - title: 可採取行動的驗證結果

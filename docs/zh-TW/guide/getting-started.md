@@ -28,8 +28,6 @@ Composer 也會透過 `lib-libxml` platform package 要求 libxml 2.6.20 以上�
 composer require mattmy/laravel-icalendar-reader
 ```
 
-安裝完成後即可使用套件。
-
 ## 設定
 
 套件可直接使用預設值：

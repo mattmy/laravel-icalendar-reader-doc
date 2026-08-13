@@ -37,9 +37,6 @@ the first match, while `properties()` preserves every match and its document ord
 or a structured array such as an RRULE map. `rawValue()` does not include the property name,
 parameters, or original line folding.
 
-`Property::toArray()` returns `name`, `type`, `value`, `values`, `parameters`, and
-`raw_value`. It is useful when returning a generic property from an API.
-
 ## Component lookup
 
 `Calendar` exposes its first-level children through `components(?string $name = null)`,

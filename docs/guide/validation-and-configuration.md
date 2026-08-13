@@ -76,3 +76,5 @@ All package exceptions implement `ICalendarException`.
 | `CalendarTooLarge` | Actual input exceeds `max_bytes`. |
 | `InvalidCalendarSource` | Wrong resource type, unreadable stream mode, or invalid upload. |
 | `InvalidConfiguration` | `max_bytes` cannot be used safely. |
+| `UnsupportedRecurrence` | A valid recurrence series cannot be expanded safely. |
+| `RecurrenceLimitExceeded` | An occurrence query evaluated more than 3,500 candidates; request a narrower range. |
