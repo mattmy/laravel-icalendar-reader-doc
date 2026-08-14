@@ -26,7 +26,7 @@ tryFromUploadedFile(UploadedFile $file): ?Calendar
 `try*()` 只會在 iCalendar 內容不合法時回傳 `null`。來源行為與例外請看
 [讀取輸入](/zh-TW/guide/reading-input)。
 
-## 查詢 Event、Todo 與警告
+## 查詢 Event、Todo、Journal 與警告
 
 ```php
 $calendar->events(?string $uid = null): Collection
@@ -35,14 +35,17 @@ $calendar->event(string $uid): ?Event
 $calendar->todos(?string $uid = null): Collection
 $calendar->hasTodos(?string $uid = null): bool
 $calendar->todo(string $uid): ?Todo
+$calendar->journals(?string $uid = null): Collection
+$calendar->hasJournals(?string $uid = null): bool
+$calendar->journal(string $uid): ?Journal
 $calendar->eventsBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->occurrencesBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->warnings(): Collection
 ```
 
-- `events()` 與 `todos()` 依文件順序回傳全部 components，或所有完全符合 UID 的資料。
-- `hasEvents()` 與 `hasTodos()` 判斷是否存在任一 component 或 UID match。
-- `event()` 與 `todo()` 回傳一筆完全符合 UID 的資料，找不到時為 `null`。
+- `events()`、`todos()` 與 `journals()` 依文件順序回傳全部 components，或所有完全符合 UID 的資料。
+- `hasEvents()`、`hasTodos()` 與 `hasJournals()` 判斷是否存在任一 component 或 UID match。
+- `event()`、`todo()` 與 `journal()` 回傳一筆完全符合 UID 的資料，找不到時為 `null`。
 - `eventsBetween()` 回傳與指定 half-open interval 重疊的 events。
 - `occurrencesBetween()` 回傳與相同範圍重疊的非重複事件及展開後 recurrence occurrences。
 - `warnings()` 回傳未阻止產生結果的 issues。
@@ -56,7 +59,7 @@ UID 比對區分大小寫；有 recurrence master 時，singular UID lookup 會�
 
 ## 查詢 properties
 
-`Calendar`、`Event`、`Todo` 與 `Component` 都提供：
+`Calendar`、`Event`、`Todo`、`Journal` 與 `Component` 都提供：
 
 ```php
 $object->properties(?string $name = null): Collection
@@ -131,10 +134,11 @@ $calendar->toComponentArray(): array
 $calendar->rawComponent(): VCalendar
 $event->rawComponent(): VEvent
 $todo->rawComponent(): VTodo
+$journal->rawComponent(): VJournal
 $component->rawComponent(): SabreComponent
 ```
 
-- `toArray()` 與 `jsonSerialize()` 回傳 Calendar、Event、Todo 與警告資料。
+- `toArray()` 與 `jsonSerialize()` 回傳 Calendar、Event、Todo、Journal 與警告資料。
 - `toJson()` 使用指定 PHP options 將相同資料編碼為 JSON。
 - `toComponentArray()` 回傳完整 property 與 component tree。
 - 每個 `rawComponent()` 都回傳供進階用途使用的獨立 Sabre component。

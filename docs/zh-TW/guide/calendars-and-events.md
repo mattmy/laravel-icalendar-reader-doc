@@ -1,4 +1,4 @@
-# Calendar、Event 與 Todo
+# Calendar、Event、Todo 與 Journal
 
 ## Calendar metadata 與查詢
 
@@ -15,11 +15,27 @@ $calendar->todos();
 $calendar->todos('task@example.test');
 $calendar->todo('task@example.test');
 $calendar->hasTodos('task@example.test');
+
+$calendar->journals();
+$calendar->journals('entry@example.test');
+$calendar->journal('entry@example.test');
+$calendar->hasJournals('entry@example.test');
 ```
 
 UID 採精確且區分大小寫的比對，不會 trim。複數方法依文件順序回傳所有符合資料；單數
 方法優先回傳沒有 `RECURRENCE-ID` 的 master，沒有 master 時回傳第一筆 override。
 找不到單筆時回傳 `null`，複數查詢則回傳空 Collection。
+
+## Journal 欄位
+
+`Journal` 是 typed `VJOURNAL` snapshot，提供 `uid`、`timestamp`、`classification`、
+`createdAt`、`startsAt`、`startIsDate`、`startIsFloating`、`lastModifiedAt`、`organizer`、
+`recurrenceId`、`recurrenceIdIsDate`、`recurrenceIdIsFloating`、`sequence`、`status`、`summary`、
+`url`、`recurrenceRule`、`attachments`、`attendees`、`categories`、`comments`、`contacts`、
+`descriptions`、`exceptionDates`、`relatedTo`、`recurrenceDates` 與 `requestStatuses`。
+
+重複 `DESCRIPTION` 會依文件順序保留在 `Collection<int, string> $descriptions`。Journal
+保留 recurrence properties，但不提供 alarm、範圍查詢或 recurrence expansion。
 
 ## Event 與 Todo 共用欄位
 

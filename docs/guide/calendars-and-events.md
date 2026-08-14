@@ -1,4 +1,4 @@
-# Calendars, events, and todos
+# Calendars, events, todos, and journals
 
 ## Calendar metadata and queries
 
@@ -15,12 +15,29 @@ $calendar->todos();
 $calendar->todos('task@example.test');
 $calendar->todo('task@example.test');
 $calendar->hasTodos('task@example.test');
+
+$calendar->journals();
+$calendar->journals('entry@example.test');
+$calendar->journal('entry@example.test');
+$calendar->hasJournals('entry@example.test');
 ```
 
 UID filters are exact, case-sensitive, and are not trimmed. Plural methods return every match
 in document order. Singular methods prefer the component without `RECURRENCE-ID`; when no
 master exists, they return the first matching override. A missing match returns `null`, and
 plural queries return an empty `Collection`.
+
+## Journal fields
+
+`Journal` is a typed `VJOURNAL` snapshot. It exposes `uid`, `timestamp`, `classification`,
+`createdAt`, `startsAt`, `startIsDate`, `startIsFloating`, `lastModifiedAt`, `organizer`,
+`recurrenceId`, `recurrenceIdIsDate`, `recurrenceIdIsFloating`, `sequence`, `status`, `summary`,
+`url`, `recurrenceRule`, `attachments`, `attendees`, `categories`, `comments`, `contacts`,
+`descriptions`, `exceptionDates`, `relatedTo`, `recurrenceDates`, and `requestStatuses`.
+
+Repeated `DESCRIPTION` values are exposed as `Collection<int, string> $descriptions` in document
+order. Journals preserve recurrence properties but do not provide alarms, range queries, or
+recurrence expansion.
 
 ## Fields shared by Event and Todo
 

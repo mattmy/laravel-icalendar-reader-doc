@@ -26,7 +26,7 @@ tryFromUploadedFile(UploadedFile $file): ?Calendar
 A `try*()` method returns `null` only for invalid iCalendar content. See
 [Reading input](/guide/reading-input) for source behavior and exceptions.
 
-## Query events, todos, and warnings
+## Query events, todos, journals, and warnings
 
 ```php
 $calendar->events(?string $uid = null): Collection
@@ -35,14 +35,17 @@ $calendar->event(string $uid): ?Event
 $calendar->todos(?string $uid = null): Collection
 $calendar->hasTodos(?string $uid = null): bool
 $calendar->todo(string $uid): ?Todo
+$calendar->journals(?string $uid = null): Collection
+$calendar->hasJournals(?string $uid = null): bool
+$calendar->journal(string $uid): ?Journal
 $calendar->eventsBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->occurrencesBetween(DateTimeInterface $from, DateTimeInterface $until): Collection
 $calendar->warnings(): Collection
 ```
 
-- `events()` and `todos()` return all components, or every exact UID match, in document order.
-- `hasEvents()` and `hasTodos()` test whether any component or UID match exists.
-- `event()` and `todo()` return one exact UID match or `null`.
+- `events()`, `todos()`, and `journals()` return all components, or every exact UID match, in document order.
+- `hasEvents()`, `hasTodos()`, and `hasJournals()` test whether any component or UID match exists.
+- `event()`, `todo()`, and `journal()` return one exact UID match or `null`.
 - `eventsBetween()` returns events overlapping the requested half-open interval.
 - `occurrencesBetween()` returns non-recurring events and expanded recurring occurrences
   overlapping the same interval.
@@ -57,7 +60,7 @@ See [Calendars, events, and todos](/guide/calendars-and-events).
 
 ## Query properties
 
-`Calendar`, `Event`, `Todo`, and `Component` expose:
+`Calendar`, `Event`, `Todo`, `Journal`, and `Component` expose:
 
 ```php
 $object->properties(?string $name = null): Collection
@@ -132,10 +135,11 @@ $calendar->toComponentArray(): array
 $calendar->rawComponent(): VCalendar
 $event->rawComponent(): VEvent
 $todo->rawComponent(): VTodo
+$journal->rawComponent(): VJournal
 $component->rawComponent(): SabreComponent
 ```
 
-- `toArray()` and `jsonSerialize()` return Calendar, Event, Todo, and warning data.
+- `toArray()` and `jsonSerialize()` return Calendar, Event, Todo, Journal, and warning data.
 - `toJson()` JSON-encodes that data with the supplied PHP options.
 - `toComponentArray()` returns the complete property and component tree.
 - Each `rawComponent()` returns an independent Sabre component for advanced use.
