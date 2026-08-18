@@ -46,6 +46,8 @@ php artisan vendor:publish --tag=icalendar-reader-config
 ## 快速開始
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::read(<<<'ICS'
 BEGIN:VCALENDAR
 VERSION:2.0

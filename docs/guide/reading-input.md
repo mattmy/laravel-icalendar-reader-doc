@@ -6,6 +6,8 @@ the same `Calendar` object.
 ## String contents
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::read($contents);
 $calendar = ICalendar::tryRead($contents);
 ```
@@ -16,6 +18,8 @@ $calendar = ICalendar::tryRead($contents);
 ## Local path
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::fromPath($path);
 $calendar = ICalendar::tryFromPath($path);
 ```
@@ -25,6 +29,8 @@ $calendar = ICalendar::tryFromPath($path);
 ## Stream
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $stream = fopen($path, 'rb');
 
 try {
@@ -42,6 +48,8 @@ stream throws `InvalidCalendarSource`; an I/O failure throws
 ## UploadedFile
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```

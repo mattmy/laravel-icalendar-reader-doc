@@ -48,6 +48,8 @@ rules and invalid configuration behavior.
 ## Quick start
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::read(<<<'ICS'
 BEGIN:VCALENDAR
 VERSION:2.0

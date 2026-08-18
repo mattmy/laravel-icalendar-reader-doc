@@ -5,6 +5,8 @@
 ## 字串
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::read($contents);
 $calendar = ICalendar::tryRead($contents);
 ```
@@ -15,6 +17,8 @@ $calendar = ICalendar::tryRead($contents);
 ## 本機路徑
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::fromPath($path);
 $calendar = ICalendar::tryFromPath($path);
 ```
@@ -24,6 +28,8 @@ $calendar = ICalendar::tryFromPath($path);
 ## Stream
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $stream = fopen($path, 'rb');
 try {
     $calendar = ICalendar::fromStream($stream);
@@ -40,6 +46,8 @@ try {
 ## UploadedFile
 
 ```php
+use Mattmy\ICalendar\Facades\ICalendar;
+
 $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
