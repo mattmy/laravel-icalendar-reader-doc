@@ -24,10 +24,10 @@ features:
 
 ## Requirements
 
-- PHP 8.3 or later in the PHP 8.x series
+- PHP 8.2 or later in the PHP 8.x series
 - Laravel 11, 12, or 13
 - PHP extensions: DOM, JSON, Multibyte String, XMLReader, and XMLWriter
 - libxml 2.6.20 or later
 
-CI currently tests PHP 8.3–8.5 with Laravel 11–13. See
+CI currently tests PHP 8.2–8.5 with Laravel 11–13. See
 [Getting started](/guide/getting-started) for installation, configuration, and a runnable example.

@@ -8,7 +8,7 @@ dates, participants, alarms, recurrence data, properties, and components.
 
 | Requirement | Declared support | Continuously tested |
 | --- | --- | --- |
-| PHP | 8.3 or later in the PHP 8.x series | 8.3, 8.4, 8.5 |
+| PHP | 8.2 or later in the PHP 8.x series | 8.2, 8.3, 8.4, 8.5 |
 | Laravel | 11, 12, 13 | 11, 12, 13 |
 
 Required PHP extensions:
