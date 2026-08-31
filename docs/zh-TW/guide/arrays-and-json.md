@@ -3,8 +3,9 @@
 ## Calendar 輸出
 
 `Calendar::toArray()` 回傳 snake_case Calendar metadata，以及 `events`、`todos`、
-`warnings`。Event 與 Todo 包含公開欄位、recurrence 資料、organizer、attendees、
-alarms 與重複值。Date-times 與 intervals 會轉為字串；缺值保留 `null`，重複值保留 list。
+`journals`、`warnings`。Event、Todo 與 Journal 包含各自適用的公開欄位、recurrence 資料、
+organizer、attendees 與重複值；Event 與 Todo 另包含 alarms。Date-times 與 intervals 會轉為
+字串；缺值保留 `null`，重複值保留 list。
 
 ```php
 $payload = $calendar->toArray();
@@ -37,6 +38,6 @@ PHP `json_encode()` 選項；轉換失敗會拋出 `JsonException`。
 呼叫 `occurrencesBetween()` 不會在 Calendar array 或 JSON 輸出加入 `occurrences`
 key；需要展開後的 instances 時，請直接使用該方法回傳的 Event Collection。
 
-需要方便使用的 Calendar、Event 與 Todo 資料時選 `toArray()`；需要完整
+需要方便使用的 Calendar、Event、Todo 與 Journal 資料時選 `toArray()`；需要完整
 component tree 時選 `toComponentArray()`。兩者都無法還原原始 `.ics` bytes，包括
 line folding、大小寫、換行樣式與 byte formatting。

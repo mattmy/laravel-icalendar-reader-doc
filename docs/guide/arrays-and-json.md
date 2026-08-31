@@ -2,10 +2,11 @@
 
 ## Calendar output
 
-`Calendar::toArray()` returns snake_case calendar metadata plus `events`, `todos`, and
-`warnings`. Events and todos include their public fields, recurrence data, organizers,
-attendees, alarms, and repeated values. Date-times and intervals are converted to strings;
-missing values remain `null`, and repeated values remain lists.
+`Calendar::toArray()` returns snake_case calendar metadata plus `events`, `todos`, `journals`,
+and `warnings`. Events, todos, and journals include their applicable public fields,
+recurrence data, organizers, attendees, and repeated values; events and todos also include
+alarms. Date-times and intervals are converted to strings; missing values remain `null`, and
+repeated values remain lists.
 
 ```php
 $payload = $calendar->toArray();
@@ -38,6 +39,6 @@ and `components`. It preserves repeated, unknown, vendor, and non-event data.
 Calling `occurrencesBetween()` does not add an `occurrences` key to Calendar array or JSON
 output. Use the returned Event collection directly when you need expanded instances.
 
-Use `toArray()` for convenient Calendar, Event, and Todo data. Use
+Use `toArray()` for convenient Calendar, Event, Todo, and Journal data. Use
 `toComponentArray()` when the complete component tree matters. Neither recreates the original
 `.ics` bytes: line folding, casing, newline style, and byte formatting are not retained.

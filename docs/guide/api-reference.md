@@ -60,7 +60,7 @@ See [Calendars, events, and todos](/guide/calendars-and-events).
 
 ## Query properties
 
-`Calendar`, `Event`, `Todo`, `Journal`, and `Component` expose:
+`Calendar`, `Event`, `Todo`, `Journal`, `Alarm`, and `Component` expose:
 
 ```php
 $object->properties(?string $name = null): Collection
@@ -136,6 +136,7 @@ $calendar->rawComponent(): VCalendar
 $event->rawComponent(): VEvent
 $todo->rawComponent(): VTodo
 $journal->rawComponent(): VJournal
+$alarm->rawComponent(): VAlarm
 $component->rawComponent(): SabreComponent
 ```
 

@@ -59,7 +59,7 @@ UID 比對區分大小寫；有 recurrence master 時，singular UID lookup 會�
 
 ## 查詢 properties
 
-`Calendar`、`Event`、`Todo`、`Journal` 與 `Component` 都提供：
+`Calendar`、`Event`、`Todo`、`Journal`、`Alarm` 與 `Component` 都提供：
 
 ```php
 $object->properties(?string $name = null): Collection
@@ -135,6 +135,7 @@ $calendar->rawComponent(): VCalendar
 $event->rawComponent(): VEvent
 $todo->rawComponent(): VTodo
 $journal->rawComponent(): VJournal
+$alarm->rawComponent(): VAlarm
 $component->rawComponent(): SabreComponent
 ```
 
