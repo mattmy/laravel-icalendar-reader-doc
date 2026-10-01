@@ -147,5 +147,6 @@ Limitations:
 - Only VEVENT is expanded, not VTODO or VJOURNAL.
 - One query evaluates at most 3,500 occurrence candidates; narrow large date ranges.
 - Some recurrence combinations are unsupported, including
-  `RECURRENCE-ID;RANGE=THISANDFUTURE` and multiple `RRULE` properties.
+  `RECURRENCE-ID;RANGE=THISANDFUTURE`, multiple `RRULE` properties, SECONDLY/MINUTELY,
+  and BYSECOND/BYMINUTE. These throw `UnsupportedRecurrence` rather than silently ignoring parts.
 - Results are not added automatically to Calendar array or JSON output.

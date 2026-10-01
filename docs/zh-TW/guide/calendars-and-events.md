@@ -143,5 +143,6 @@ $occurrences = $calendar->occurrencesBetween(
 - 只展開 VEVENT，不展開 VTODO 或 VJOURNAL。
 - 單次查詢最多評估 3,500 個 occurrence candidates，範圍過大時應縮小日期區間。
 - 部分 recurrence 組合不支援，例如 `RECURRENCE-ID;RANGE=THISANDFUTURE` 或多個
-  `RRULE`。
+  `RRULE`，以及 SECONDLY／MINUTELY、BYSECOND／BYMINUTE；會拋出 `UnsupportedRecurrence`，
+  不會靜默忽略規則。
 - 查詢結果不會自動加入 Calendar 的 array 或 JSON 輸出。
