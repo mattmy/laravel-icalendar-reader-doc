@@ -42,7 +42,7 @@ Event 與 Todo 都提供 typed organizer、attendees 與巢狀 alarms。
 | `repeat` | `?int` | `REPEAT` 次數。 |
 | `duration` | `?DateInterval` | 每次重複之間的時間。 |
 | `properties()`, `property()` | `Collection` / `?Property` | Direct standard、IANA 與 extension properties。 |
-| `rawComponent()` | `VAlarm` | 底層 alarm component 的 defensive clone。 |
+| `rawComponent()` | `VAlarm` | 底層的 alarm component。 |
 
 ```php
 $trigger = $event->alarms->first()?->trigger;

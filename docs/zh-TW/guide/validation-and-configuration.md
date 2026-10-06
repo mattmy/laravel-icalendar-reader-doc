@@ -6,6 +6,10 @@
 這個例外轉為 `null`；來源、大小與設定錯誤仍會拋出各自的例外。Reader 不會修補被拒絕
 的內容。
 
+Reader 也會在建立行事曆物件前，檢查 BOOLEAN／FLOAT 值，以及基本 RRULE 的格式、
+值與組合。規則格式不合法時，讀取就會失敗；規則合法但查詢無法展開時，
+則會拋出 `UnsupportedRecurrence`。
+
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
 use Mattmy\ICalendar\Facades\ICalendar;
@@ -76,4 +80,5 @@ return [
 | `InvalidCalendarSource` | Resource type、stream mode 或 upload 不合法。 |
 | `InvalidConfiguration` | `max_bytes` 無法安全使用。 |
 | `UnsupportedRecurrence` | 合法 recurrence series 無法被安全展開。 |
+| `UnresolvableEventRange` | 範圍查詢無法確認非重複事件的結束時間，整個查詢失敗，不會回傳部分結果。 |
 | `RecurrenceLimitExceeded` | Occurrence 查詢評估超過 3,500 個 candidates；請縮小範圍。 |

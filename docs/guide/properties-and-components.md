@@ -31,7 +31,7 @@ the first match, while `properties()` preserves every match and its document ord
 | `parameters()` | `array<string,string\|list<string>>` | All parameters with uppercase names. |
 | `parameter($name)` | `string\|list<string>\|null` | One case-insensitive parameter lookup. |
 | `rawValue()` | `string` | The property value as text. |
-| `toArray()` | `array` | A serializable snapshot of all fields above. |
+| `toArray()` | `array` | All fields above in array form. |
 
 `PropertyAtom` may be `bool`, `int`, `float`, `string`, `CarbonImmutable`, `DateInterval`,
 or a structured array such as an RRULE map. `rawValue()` does not include the property name,
@@ -57,6 +57,4 @@ unknown `X-*` components, including generic views of events and todos.
 ## Raw component access
 
 `Calendar::rawComponent()`, `Event::rawComponent()`, `Todo::rawComponent()`, and
-`Component::rawComponent()` return an independent Sabre component for advanced use.
-Changing it does not change the package's read model. Creating these copies can be expensive
-for large calendars, so reuse a result instead of repeatedly calling the method in a loop.
+`Component::rawComponent()` return a Sabre component for advanced use.

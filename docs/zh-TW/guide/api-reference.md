@@ -52,7 +52,10 @@ $calendar->warnings(): Collection
 
 UID 比對區分大小寫；有 recurrence master 時，singular UID lookup 會優先回傳 master。
 兩種範圍查詢都接受 `DateTimeInterface`（包括 Carbon）；`$from` 不早於 `$until` 時
-會拋出 `InvalidArgumentException`。`eventsBetween()` 不展開 recurrence rules；
+會拋出 `InvalidArgumentException`。`eventsBetween()` 不會展開重複事件。
+
+兩種方法遇到可能與範圍重疊、卻無法確認結束時間的非重複事件時，都會拋出
+`UnresolvableEventRange`，整個查詢失敗，不會回傳部分結果。
 `occurrencesBetween()` 另可能拋出 `UnsupportedRecurrence` 或
 `RecurrenceLimitExceeded`。詳見
 [Calendar、Event 與 Todo](/zh-TW/guide/calendars-and-events)。

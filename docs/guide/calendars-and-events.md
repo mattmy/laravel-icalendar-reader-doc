@@ -29,7 +29,7 @@ plural queries return an empty `Collection`.
 
 ## Journal fields
 
-`Journal` is a typed `VJOURNAL` snapshot. It exposes `uid`, `timestamp`, `classification`,
+`Journal` is a typed `VJOURNAL` model. It exposes `uid`, `timestamp`, `classification`,
 `createdAt`, `startsAt`, `startIsDate`, `startIsFloating`, `lastModifiedAt`, `organizer`,
 `recurrenceId`, `recurrenceIdIsDate`, `recurrenceIdIsFloating`, `sequence`, `status`, `summary`,
 `url`, `recurrenceRule`, `attachments`, `attendees`, `categories`, `comments`, `contacts`,
@@ -103,10 +103,9 @@ Todo has no implicit one-day duration. Without enough `DTSTART`, `DUE`, or `DURA
 - An unresolved document `TZID` adds a warning and leaves the typed date field `null`; the
   original Property remains available.
 - `DTEND` is exclusive. All-day `lastDay` is one calendar day before `endsAt`.
-- An all-day Event without `DTEND` gets an implicit one-calendar-day end.
+- If an all-day Event has neither `DTEND` nor `DURATION`, it ends at the start of the next day.
 - Derived Event end flags and Todo due flags inherit their start flags.
 - `RECURRENCE-ID` flags always describe that property itself.
-- `DateInterval` is mutable in PHP; clone it before changing a value you need to retain.
 
 Recurrence properties remain available on the original Event objects. Use the occurrence query
 below when you need the concrete instances produced by those properties.
@@ -121,6 +120,19 @@ Both boundaries accept `DateTimeInterface`. The interval is half-open: `$from` i
 an event starting exactly at `$until` is excluded. `$from` must be earlier than `$until`, or
 `InvalidArgumentException` is thrown. Events without a usable start are excluded, and only
 VEVENT components actually present in the calendar are returned.
+
+An event overlaps the range when it starts before `$until` and ends after `$from`.
+A DATE-TIME event with neither `DTEND` nor `DURATION` counts as a single point in time:
+its start must be at or after `$from` and before `$until`.
+
+If the reader cannot determine an event's end from `DTEND`, `DURATION`, or an all-day
+event's default one-day span, it throws `UnresolvableEventRange` without returning a
+partial list. This includes events that started before `$from`, since they might still
+be running during your range.
+
+Events with no usable start, or starting at or after `$until`, are skipped without
+checking their ends. If the query fails, you can still inspect the Calendar's fields
+and warnings.
 
 ## Recurring event occurrences
 
@@ -144,6 +156,9 @@ Carbon. The query uses `[from, until)`, and `$from` must be earlier than `$until
 
 Limitations:
 
+- Non-recurring events use the same range rules as `eventsBetween()`. If an end time
+  cannot be determined, the query throws `UnresolvableEventRange`; if dates needed to
+  expand a recurring event cannot be determined, it throws `UnsupportedRecurrence`.
 - Only VEVENT is expanded, not VTODO or VJOURNAL.
 - One query evaluates at most 3,500 occurrence candidates; narrow large date ranges.
 - Some recurrence combinations are unsupported, including

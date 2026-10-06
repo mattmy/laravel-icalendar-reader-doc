@@ -56,6 +56,9 @@ is present. Both range methods accept `DateTimeInterface`, including Carbon; the
 `InvalidArgumentException` when `$from` is not earlier than `$until`. `eventsBetween()` does not
 expand recurrence rules. `occurrencesBetween()` may also throw `UnsupportedRecurrence` or
 `RecurrenceLimitExceeded`.
+
+Both methods throw `UnresolvableEventRange` if a non-recurring event could overlap the
+range but its end time cannot be determined. The query fails without returning a partial list.
 See [Calendars, events, and todos](/guide/calendars-and-events).
 
 ## Query properties

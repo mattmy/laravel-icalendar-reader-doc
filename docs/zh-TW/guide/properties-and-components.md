@@ -31,7 +31,7 @@ $object->property('SUMMARY');
 | `parameters()` | `array<string,string\|list<string>>` | 全部 parameters，名稱為大寫。 |
 | `parameter($name)` | `string\|list<string>\|null` | 大小寫不敏感取得一個 parameter。 |
 | `rawValue()` | `string` | Property 的文字值。 |
-| `toArray()` | `array` | 上述資料的可序列化快照。 |
+| `toArray()` | `array` | 將上述欄位轉成陣列。 |
 
 `PropertyAtom` 可能是 `bool`、`int`、`float`、`string`、`CarbonImmutable`、
 `DateInterval` 或 RRULE map 等 structured array。`rawValue()` 不包含 property name、
@@ -57,6 +57,4 @@ $fbType = $periods?->first()?->parameter('FBTYPE');
 ## Raw component 存取
 
 `Calendar::rawComponent()`、`Event::rawComponent()`、`Todo::rawComponent()` 與
-`Component::rawComponent()` 會回傳供進階用途使用的獨立 Sabre component；修改它
-不會改變套件的 read model。建立副本對大型行事曆可能較耗資源，請重用結果，避免在
-loop 中重複呼叫。
+`Component::rawComponent()` 會回傳供進階用途使用的 Sabre component。

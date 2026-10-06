@@ -6,6 +6,10 @@
 counterparts return `null` only for that exception; source, size, and configuration failures
 still throw their specific exceptions. The reader does not repair rejected content.
 
+The reader also checks BOOLEAN/FLOAT values and basic RRULE syntax, values, and combinations
+before creating calendar objects. An invalid rule is rejected when reading the calendar;
+a valid rule that the query cannot expand raises `UnsupportedRecurrence`.
+
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
 use Mattmy\ICalendar\Facades\ICalendar;
@@ -78,4 +82,5 @@ All package exceptions implement `ICalendarException`.
 | `InvalidCalendarSource` | Wrong resource type, unreadable stream mode, or invalid upload. |
 | `InvalidConfiguration` | `max_bytes` cannot be used safely. |
 | `UnsupportedRecurrence` | A valid recurrence series cannot be expanded safely. |
+| `UnresolvableEventRange` | A range query cannot determine a non-recurring event's end time and fails without returning a partial list. |
 | `RecurrenceLimitExceeded` | An occurrence query evaluated more than 3,500 candidates; request a narrower range. |

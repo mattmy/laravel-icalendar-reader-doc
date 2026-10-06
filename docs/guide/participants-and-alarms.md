@@ -42,7 +42,7 @@ Each `Alarm` represents one `VALARM` inside an event or todo.
 | `repeat` | `?int` | `REPEAT` count. |
 | `duration` | `?DateInterval` | Time between repeats. |
 | `properties()`, `property()` | `Collection` / `?Property` | Direct standard, IANA, and extension properties. |
-| `rawComponent()` | `VAlarm` | A defensive clone of the low-level alarm component. |
+| `rawComponent()` | `VAlarm` | The low-level alarm component. |
 
 ```php
 $trigger = $event->alarms->first()?->trigger;
