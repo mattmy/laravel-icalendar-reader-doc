@@ -69,8 +69,7 @@ echo $event->summary; // Project meeting
 echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
 
-Every read method returns the same `Calendar` type. Collections preserve document order, and
-missing optional values are `null` or empty collections rather than invented defaults.
+Successful reads return a `Calendar`. Collections preserve document order.
 
 ## Next steps
 

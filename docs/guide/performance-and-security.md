@@ -2,10 +2,8 @@
 
 ## Performance characteristics
 
-- Reading requires more memory than the `.ics` file size. Calendars with many properties,
-  components, attendees, alarms, or timezone definitions require more memory and time.
-- The complete accepted calendar remains in memory, including when it comes from a path,
-  stream, or upload.
+- Reading keeps the complete calendar in memory, even from a stream. Allow more memory than
+  the `.ics` file size; properties, components, participants, alarms, and timezones add overhead.
 - Repeated calls to `events()`, `todos()`, UID lookups, `properties()`, `components()`, or
   range queries over large calendars add work. Keep and reuse results when possible.
 - `toArray()`, `toJson()`, and especially `toComponentArray()` create complete output data.
@@ -17,14 +15,9 @@
 - `eventsBetween()` and todo queries do not expand recurrence; they only return components stored
   in the `.ics` file.
 
-The bundled benchmark is not a production capacity promise. Test with your largest real-world
-calendars before selecting request, queue, and memory limits.
-
-## Operational guidance
-
-Set `max_bytes` well below the PHP worker memory limit and account for concurrent requests.
-For large imports, prefer queues with explicit memory and time limits. Avoid reading the same
-content repeatedly; cache application results only when privacy and freshness permit it.
+Test with your largest real-world calendars before choosing `max_bytes` and worker limits.
+Allow for concurrent requests and memory overhead. For large imports, use a queue with
+explicit memory and time limits.
 
 ## Security
 

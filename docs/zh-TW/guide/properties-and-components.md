@@ -6,7 +6,7 @@
 
 ## Property 查詢
 
-`Calendar`、`Event`、`Todo`、`Component` 都提供相同的 direct-property 方法：
+`Calendar`、`Event`、`Todo`、`Journal`、`Alarm` 與 `Component` 都提供相同的屬性查詢方法：
 
 ```php
 $object->properties();
@@ -16,9 +16,9 @@ $object->hasProperty('RRULE');
 $object->property('SUMMARY');
 ```
 
-名稱會 trim 並採大小寫不敏感比較。`null` 代表全部 direct properties；空白名稱會拋出
-`InvalidArgumentException`。查詢不遞迴；`property()` 取第一筆，`properties()` 則保留
-全部符合資料與文件順序。
+名稱會去除前後空白，比對時不區分大小寫。省略名稱或傳入 `null` 時查詢全部直接屬性；
+空白名稱會拋出 `InvalidArgumentException`。查詢不遞迴；`property()` 取第一筆，
+`properties()` 則保留全部符合的資料與原始順序。
 
 ## Property 值
 
@@ -26,12 +26,12 @@ $object->property('SUMMARY');
 | --- | --- | --- |
 | `name` | `string` | 大寫 property name。 |
 | `type` | `string` | 值類型，例如 `text`、`date-time` 或 `recur`。 |
-| `value` | value/list/`null` | 方便使用的單值；重複值則為 list。 |
+| `value` | value/list/`null` | 沒有值時為 `null`，一個值時直接回傳，多個值時為 list。 |
 | `values` | `list<PropertyAtom>` | Property 攜帶的全部值。 |
 | `parameters()` | `array<string,string\|list<string>>` | 全部 parameters，名稱為大寫。 |
 | `parameter($name)` | `string\|list<string>\|null` | 大小寫不敏感取得一個 parameter。 |
-| `rawValue()` | `string` | Property 的文字值。 |
-| `toArray()` | `array` | 將上述欄位轉成陣列。 |
+| `rawValue()` | `string` | 正規化後的 Property 文字值。 |
+| `toArray()` | `array` | 包含 `name`、`type`、`value`、`values`、`parameters` 與 `raw_value`。 |
 
 `PropertyAtom` 可能是 `bool`、`int`、`float`、`string`、`CarbonImmutable`、
 `DateInterval` 或 RRULE map 等 structured array。`rawValue()` 不包含 property name、
@@ -56,5 +56,5 @@ $fbType = $periods?->first()?->parameter('FBTYPE');
 
 ## Raw component 存取
 
-`Calendar::rawComponent()`、`Event::rawComponent()`、`Todo::rawComponent()` 與
-`Component::rawComponent()` 會回傳供進階用途使用的 Sabre component。
+`Calendar`、`Event`、`Todo`、`Journal`、`Alarm` 與 `Component` 都提供 `rawComponent()`，
+可取得對應的 Sabre component，供進階用途使用。

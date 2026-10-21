@@ -17,14 +17,12 @@ use Mattmy\ICalendar\Facades\ICalendar;
 try {
     $calendar = ICalendar::read($contents);
 } catch (InvalidCalendar $exception) {
-    foreach ($exception->issues() as $issue) {
-        report($issue->message);
-    }
+    $issues = $exception->issues();
 }
 ```
 
-Readable content may still produce issues in `$calendar->warnings()`.
-`InvalidCalendar::issues()` returns `Collection<int, CalendarIssue>`.
+`issues()` explains rejected content; `$calendar->warnings()` reports issues with readable
+content or configuration. Both return `Collection<int, CalendarIssue>`.
 
 ## CalendarIssue
 
@@ -82,5 +80,8 @@ All package exceptions implement `ICalendarException`.
 | `InvalidCalendarSource` | Wrong resource type, unreadable stream mode, or invalid upload. |
 | `InvalidConfiguration` | `max_bytes` cannot be used safely. |
 | `UnsupportedRecurrence` | A valid recurrence series cannot be expanded safely. |
-| `UnresolvableEventRange` | A range query cannot determine a non-recurring event's end time and fails without returning a partial list. |
+| `UnresolvableEventRange` | `eventsBetween()` cannot determine a required end time; also applies to non-recurring events in `occurrencesBetween()`. The entire query fails. |
 | `RecurrenceLimitExceeded` | An occurrence query evaluated more than 3,500 candidates; request a narrower range. |
+
+PHP's `InvalidArgumentException` is used for blank lookup names or invalid query ranges;
+`JsonException` is used for JSON encoding failures. These are not package exceptions.

@@ -58,7 +58,7 @@ recurrence expansion.
 | `attendees` | `Collection<int, Attendee>` | Repeated attendees in document order. |
 | `alarms` | `Collection<int, Alarm>` | Direct `VALARM` children. |
 | `categories` | `Collection<int, string>` | Flattened `CATEGORIES` text-list values in order. |
-| `geo` | `?array{latitude: float, longitude: float}` | An in-range `GEO` pair; malformed or out-of-range data returns `null`. |
+| `geo` | `?array{latitude: float, longitude: float}` | `GEO` coordinates, or `null` when absent or out of range. |
 | `comments`, `contacts` | `Collection<int, string>` | One decoded string per repeated `COMMENT` or `CONTACT`. |
 | `resources` | `Collection<int, string>` | Flattened `RESOURCES` text-list values in order. |
 | `recurrenceRule` | `?Property` | First `RRULE`, including values, parameters, and raw text. |
@@ -68,8 +68,8 @@ recurrence expansion.
 | `relatedTo` | `Collection<int, Property>` | Every `RELATED-TO`. |
 | `recurrenceDates` | `Collection<int, Property>` | Every `RDATE`. |
 
-These convenience fields do not remove their generic properties. For example, an invalid
-typed `geo` remains available through `property('GEO')`.
+These fields do not remove their generic properties. For example, out-of-range GEO coordinates
+remain available through `property('GEO')`. Invalid FLOAT syntax is rejected during reading.
 
 ## Event-only fields
 
@@ -98,8 +98,9 @@ Todo has no implicit one-day duration. Without enough `DTSTART`, `DUE`, or `DURA
 
 ## Date and duration behavior
 
-- UTC values retain UTC; resolvable `TZID` values retain that timezone.
-- Floating DATE-TIME values use `Calendar::$floatingTimezone`.
+- UTC values retain UTC; `TZID` values use the calendar's matching `VTIMEZONE` definition.
+- DATE values map to midnight in `Calendar::$floatingTimezone`; floating DATE-TIME values use
+  the same timezone.
 - An unresolved document `TZID` adds a warning and leaves the typed date field `null`; the
   original Property remains available.
 - `DTEND` is exclusive. All-day `lastDay` is one calendar day before `endsAt`.

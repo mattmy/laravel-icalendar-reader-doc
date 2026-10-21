@@ -1,7 +1,6 @@
 # Reading input
 
-Choose a method based on where the `.ics` data comes from. Every successful method returns
-the same `Calendar` object.
+Choose a method based on where the `.ics` data comes from. Successful reads return a `Calendar`.
 
 ## String contents
 
@@ -33,6 +32,10 @@ use Mattmy\ICalendar\Facades\ICalendar;
 
 $stream = fopen($path, 'rb');
 
+if ($stream === false) {
+    throw new RuntimeException('Could not open the calendar file.');
+}
+
 try {
     $calendar = ICalendar::fromStream($stream);
 } finally {
@@ -40,7 +43,7 @@ try {
 }
 ```
 
-`$stream` accepts a readable PHP stream resource. Reading starts from its current position.
+Pass a readable PHP stream resource. Reading starts from its current position.
 The package does not rewind or close the stream for you. Passing a non-stream or write-only
 stream throws `InvalidCalendarSource`; an I/O failure throws
 `CalendarFileUnreadable`. `tryFromStream()` only converts `InvalidCalendar` to `null`.

@@ -35,7 +35,7 @@ Each `Alarm` represents one `VALARM` inside an event or todo.
 | Member | Type | Meaning |
 | --- | --- | --- |
 | `action` | `?string` | `ACTION`. |
-| `trigger` | `?AlarmTrigger` | Relative or absolute `TRIGGER`; invalid or absent values return `null`. |
+| `trigger` | `?AlarmTrigger` | Relative or absolute `TRIGGER`. |
 | `description`, `summary` | `?string` | Reminder text. |
 | `attendees` | `Collection<int, Attendee>` | Repeated alarm attendees in document order. |
 | `attachments` | `Collection<int, Property>` | Repeated `ATTACH` properties in document order. |
@@ -56,5 +56,5 @@ $trigger?->relatedTo();  // START, END, or null
 
 For a relative trigger, `duration()` is the offset before or after the related event or todo
 boundary, and `relatedTo()` identifies its start or end. For an absolute trigger,
-`dateTime()` is the reminder time. If the typed trigger is `null` and you need its normalized
-or low-level value, inspect the Alarm through `property('TRIGGER')` or `rawComponent()`.
+`dateTime()` is the reminder time. Use `property('TRIGGER')` for its value and parameters,
+or `rawComponent()` for the complete alarm.

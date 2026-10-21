@@ -5,8 +5,9 @@
 `Calendar::toArray()` returns snake_case calendar metadata plus `events`, `todos`, `journals`,
 and `warnings`. Events, todos, and journals include their applicable public fields,
 recurrence data, organizers, attendees, and repeated values; events and todos also include
-alarms. Date-times and intervals are converted to strings; missing values remain `null`, and
-repeated values remain lists.
+alarms. Typed date and duration fields become strings; missing values remain `null`, and
+repeated values remain lists. Generic Property values keep their PHP types, including
+`CarbonImmutable` and `DateInterval`, in `toArray()` and `toComponentArray()`.
 
 ```php
 $payload = $calendar->toArray();

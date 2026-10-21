@@ -4,8 +4,9 @@
 
 `Calendar::toArray()` 回傳 snake_case Calendar metadata，以及 `events`、`todos`、
 `journals`、`warnings`。Event、Todo 與 Journal 包含各自適用的公開欄位、recurrence 資料、
-organizer、attendees 與重複值；Event 與 Todo 另包含 alarms。Date-times 與 intervals 會轉為
-字串；缺值保留 `null`，重複值保留 list。
+主辦人、參與者與重複值；Event 與 Todo 另包含提醒。日期與 duration 便捷欄位會轉為
+字串；缺值保留 `null`，重複值保留 list。`toArray()` 與 `toComponentArray()` 中的
+generic Property 值仍保留 PHP 型別，包括 `CarbonImmutable` 與 `DateInterval`。
 
 ```php
 $payload = $calendar->toArray();

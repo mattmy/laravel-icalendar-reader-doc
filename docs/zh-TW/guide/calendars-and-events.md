@@ -1,9 +1,9 @@
 # Calendar、Event、Todo 與 Journal
 
-## Calendar metadata 與查詢
+## Calendar 基本資料與查詢
 
-`Calendar` 代表一份合法 `VCALENDAR`。Public metadata 包含 `version`、`productId`、
-`method`、`calendarScale` 與 `floatingTimezone`；缺少的 optional metadata 是 `null`。
+`Calendar` 代表一份合法 `VCALENDAR`，可取得 `version`、`productId`、`method`、
+`calendarScale` 與 `floatingTimezone`；未提供的選填資料為 `null`。
 
 ```php
 $calendar->events();
@@ -22,8 +22,8 @@ $calendar->journal('entry@example.test');
 $calendar->hasJournals('entry@example.test');
 ```
 
-UID 採精確且區分大小寫的比對，不會 trim。複數方法依文件順序回傳所有符合資料；單數
-方法優先回傳沒有 `RECURRENCE-ID` 的 master，沒有 master 時回傳第一筆 override。
+UID 比對區分大小寫，不會去除前後空白。複數方法依原始順序回傳所有符合的資料；單數
+方法優先回傳沒有 `RECURRENCE-ID` 的主事件（master），沒有主事件時回傳第一筆單次覆寫（override）。
 找不到單筆時回傳 `null`，複數查詢則回傳空 Collection。
 
 ## Journal 欄位
@@ -56,7 +56,7 @@ UID 採精確且區分大小寫的比對，不會 trim。複數方法依文件�
 | `attendees` | `Collection<int, Attendee>` | 依文件順序保留的所有 `ATTENDEE`。 |
 | `alarms` | `Collection<int, Alarm>` | Direct `VALARM` children。 |
 | `categories` | `Collection<int, string>` | 依順序展平的 `CATEGORIES` text-list values。 |
-| `geo` | `?array{latitude: float, longitude: float}` | 合法範圍內的 `GEO`；格式或範圍無效時為 `null`。 |
+| `geo` | `?array{latitude: float, longitude: float}` | `GEO` 座標；缺少或超出座標範圍時為 `null`。 |
 | `comments`, `contacts` | `Collection<int, string>` | 每個重複 `COMMENT`／`CONTACT` 對應一個字串。 |
 | `resources` | `Collection<int, string>` | 依順序展平的 `RESOURCES` text-list values。 |
 | `recurrenceRule` | `?Property` | 第一個 `RRULE`，包含 values、parameters 與 raw text。 |
@@ -66,8 +66,8 @@ UID 採精確且區分大小寫的比對，不會 trim。複數方法依文件�
 | `relatedTo` | `Collection<int, Property>` | 所有 `RELATED-TO`。 |
 | `recurrenceDates` | `Collection<int, Property>` | 所有 `RDATE`。 |
 
-Convenience 欄位不會移除 generic properties。例如無效的 typed `geo` 仍能透過
-`property('GEO')` 取得原始資料。
+這些便捷欄位不會移除原本的 Property。例如超出範圍的 GEO 座標仍能透過
+`property('GEO')` 取得；FLOAT 格式不合法則會在讀取時遭拒絕。
 
 ## Event 專屬欄位
 
@@ -96,8 +96,9 @@ Todo 沒有隱含的一日 duration；`DTSTART`、`DUE`、`DURATION` 資料不�
 
 ## 日期與 duration 行為
 
-- UTC 會保留 UTC；可識別的 `TZID` 會保留該時區。
-- Floating DATE-TIME 使用 `Calendar::$floatingTimezone`。
+- UTC 會保留 UTC；`TZID` 使用行事曆內相符的 `VTIMEZONE` 定義。
+- DATE 對應到 `Calendar::$floatingTimezone` 的午夜；沒有 `Z` 或 `TZID` 的
+  floating DATE-TIME 也使用這個時區。
 - 文件內無法識別的 `TZID` 會產生 warning，typed 日期欄位為 `null`，原始 Property 仍保留。
 - `DTEND` 是 exclusive；全天 `lastDay` 比 `endsAt` 早一個 calendar day。
 - 全天 Event 如果沒有指定 `DTEND` 和 `DURATION`，就會在隔天零點結束。

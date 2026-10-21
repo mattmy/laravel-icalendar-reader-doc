@@ -1,6 +1,6 @@
 # 參與者與提醒
 
-Event 與 Todo 都提供 typed organizer、attendees 與巢狀 alarms。
+Event 與 Todo 都可取得主辦人、參與者與提醒。
 
 ## Organizer
 
@@ -35,13 +35,13 @@ Event 與 Todo 都提供 typed organizer、attendees 與巢狀 alarms。
 | Member | 型別 | 意義 |
 | --- | --- | --- |
 | `action` | `?string` | `ACTION`。 |
-| `trigger` | `?AlarmTrigger` | 相對或絕對 `TRIGGER`；缺少或不合法時為 `null`。 |
+| `trigger` | `?AlarmTrigger` | 相對或絕對 `TRIGGER`。 |
 | `description`, `summary` | `?string` | 提醒文字。 |
-| `attendees` | `Collection<int, Attendee>` | 依文件順序保留的重複 alarm attendees。 |
+| `attendees` | `Collection<int, Attendee>` | 依原始順序保留的提醒參與者。 |
 | `attachments` | `Collection<int, Property>` | 依原始順序保留的重複 `ATTACH` properties。 |
 | `repeat` | `?int` | `REPEAT` 次數。 |
 | `duration` | `?DateInterval` | 每次重複之間的時間。 |
-| `properties()`, `property()` | `Collection` / `?Property` | Direct standard、IANA 與 extension properties。 |
+| `properties()`, `property()` | `Collection` / `?Property` | 直接屬性，包含標準與擴充欄位。 |
 | `rawComponent()` | `VAlarm` | 底層的 alarm component。 |
 
 ```php
@@ -54,7 +54,6 @@ $trigger?->dateTime();   // ?CarbonImmutable
 $trigger?->relatedTo();  // START、END 或 null
 ```
 
-相對 trigger 的 `duration()` 是 Event 或 Todo 對應邊界前後的偏移量，`relatedTo()`
-表示開始或結束；absolute trigger 則由 `dateTime()` 提供提醒時間。若 typed trigger 為
-`null` 且需要其 normalized 或底層值，請透過 Alarm 的 `property('TRIGGER')` 或
-`rawComponent()` 檢查。
+相對提醒的 `duration()` 表示距離事件或待辦開始／結束時間的偏移量，`relatedTo()`
+指定以哪個時間為準。絕對提醒則由 `dateTime()` 提供確切時間。需要值與參數時可用
+`property('TRIGGER')`；需要完整提醒資料時可用 `rawComponent()`。

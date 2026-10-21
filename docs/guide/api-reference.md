@@ -5,7 +5,8 @@ errors; public readonly fields are documented in the guide for each object.
 
 ## Read a calendar
 
-`ICalendar` provides these input methods:
+Import `Mattmy\ICalendar\Facades\ICalendar` to use these methods, or inject
+`Mattmy\ICalendar\Reader` for the same API:
 
 ```php
 read(string $contents): Calendar
@@ -17,11 +18,6 @@ tryFromStream(mixed $stream): ?Calendar
 fromUploadedFile(UploadedFile $file): Calendar
 tryFromUploadedFile(UploadedFile $file): ?Calendar
 ```
-
-- `read()` / `tryRead()` read a complete iCalendar string.
-- `fromPath()` / `tryFromPath()` read a local regular file.
-- `fromStream()` / `tryFromStream()` read from a stream's current position.
-- `fromUploadedFile()` / `tryFromUploadedFile()` read a Laravel uploaded file.
 
 A `try*()` method returns `null` only for invalid iCalendar content. See
 [Reading input](/guide/reading-input) for source behavior and exceptions.
@@ -57,8 +53,8 @@ is present. Both range methods accept `DateTimeInterface`, including Carbon; the
 expand recurrence rules. `occurrencesBetween()` may also throw `UnsupportedRecurrence` or
 `RecurrenceLimitExceeded`.
 
-Both methods throw `UnresolvableEventRange` if a non-recurring event could overlap the
-range but its end time cannot be determined. The query fails without returning a partial list.
+`eventsBetween()` throws `UnresolvableEventRange` when a required end time cannot be determined.
+The same applies to non-recurring events in `occurrencesBetween()`. The entire query fails.
 See [Calendars, events, and todos](/guide/calendars-and-events).
 
 ## Query properties
@@ -82,15 +78,9 @@ $organizer->parameters(): array
 $attendee->parameters(): array
 ```
 
-- `properties()` returns all direct properties or every name match.
-- `hasProperty()` tests whether any direct property or name match exists.
-- `property()` returns the first name match or `null`.
-- `parameters()` returns all parameters without dropping multi-value entries.
-- `parameter()` returns one parameter, an array for a multi-value parameter, or `null`.
-- `rawValue()` returns the property's text value.
-- `Property::toArray()` returns the complete serializable property representation.
-
-Names are case-insensitive and direct lookup does not recurse. See
+Property names are case-insensitive; lookup only checks direct properties. Singular lookup
+returns the first match or `null`. Parameters preserve multiple values; `rawValue()` returns
+normalized text. See
 [Properties and components](/guide/properties-and-components).
 
 ## Query components
@@ -146,7 +136,7 @@ $component->rawComponent(): SabreComponent
 - `toArray()` and `jsonSerialize()` return Calendar, Event, Todo, Journal, and warning data.
 - `toJson()` JSON-encodes that data with the supplied PHP options.
 - `toComponentArray()` returns the complete property and component tree.
-- Each `rawComponent()` returns an independent Sabre component for advanced use.
+- `rawComponent()` returns the corresponding Sabre component for advanced use.
 
 See [Arrays and JSON](/guide/arrays-and-json).
 

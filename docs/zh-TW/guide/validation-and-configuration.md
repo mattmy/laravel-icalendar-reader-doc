@@ -17,14 +17,12 @@ use Mattmy\ICalendar\Facades\ICalendar;
 try {
     $calendar = ICalendar::read($contents);
 } catch (InvalidCalendar $exception) {
-    foreach ($exception->issues() as $issue) {
-        report($issue->message);
-    }
+    $issues = $exception->issues();
 }
 ```
 
-仍可讀取的內容可能在 `$calendar->warnings()` 中帶有 issues。
-`InvalidCalendar::issues()` 回傳 `Collection<int, CalendarIssue>`。
+`issues()` 說明內容遭拒絕的原因；`$calendar->warnings()` 回報仍可讀取的內容或設定問題。
+兩者都回傳 `Collection<int, CalendarIssue>`。
 
 ## CalendarIssue
 
@@ -32,10 +30,10 @@ try {
 | --- | --- |
 | `level` | `int`：`CalendarIssue::LEVEL_WARNING`（`2`）或 `CalendarIssue::LEVEL_ERROR`（`3`）。 |
 | `code` | `string`：`parser_error`、`invalid_root_component`、`validation_error`、`validation_warning`、`invalid_timezone_configuration` 或 `mapping_warning`。 |
-| `message` | `string`：人類可讀細節，不應當成 machine code。 |
+| `message` | `string`：供人閱讀的說明；程式判斷請用 `code`。 |
 | `source` | `string`：`parser`、`validator`、`configuration` 或 `mapping`。 |
-| `line` | `?int`：optional source line。 |
-| `component`, `property` | `?string`：optional iCalendar 名稱。 |
+| `line` | `?int`：來源行號，無法取得時為 `null`。 |
+| `component`, `property` | `?string`：相關的 iCalendar 名稱，無法取得時為 `null`。 |
 
 `toArray()` 與 `jsonSerialize()` 都回傳相同的七個固定 keys。
 
@@ -54,7 +52,7 @@ return [
 ];
 ```
 
-`max_bytes` 必須是正整數，限制依實際讀取的 bytes 執行，而不是依 client metadata；
+`max_bytes` 必須是正整數，依實際讀取的位元組數限制大小，不採信用戶端提供的大小；
 無效值會拋出 `InvalidConfiguration`。
 
 `floating_timezone` 控制沒有 `Z` 或 `TZID` 的 date-times：
@@ -74,11 +72,14 @@ return [
 | 例外 | 意義 |
 | --- | --- |
 | `InvalidCalendar` | 語法、root 或 validation 錯誤；可查 `issues()`。 |
-| `CalendarFileNotFound` | 本機檔案或 upload backing file 不存在。 |
+| `CalendarFileNotFound` | 本機檔案或上傳暫存檔不存在。 |
 | `CalendarFileUnreadable` | 已存在的檔案或 stream 無法讀取。 |
 | `CalendarTooLarge` | 實際輸入超過 `max_bytes`。 |
-| `InvalidCalendarSource` | Resource type、stream mode 或 upload 不合法。 |
-| `InvalidConfiguration` | `max_bytes` 無法安全使用。 |
-| `UnsupportedRecurrence` | 合法 recurrence series 無法被安全展開。 |
-| `UnresolvableEventRange` | 範圍查詢無法確認非重複事件的結束時間，整個查詢失敗，不會回傳部分結果。 |
-| `RecurrenceLimitExceeded` | Occurrence 查詢評估超過 3,500 個 candidates；請縮小範圍。 |
+| `InvalidCalendarSource` | 傳入的值不是可讀 stream，或上傳檔案無效。 |
+| `InvalidConfiguration` | `max_bytes` 不是正整數。 |
+| `UnsupportedRecurrence` | 合法的重複事件規則無法安全展開。 |
+| `UnresolvableEventRange` | `eventsBetween()` 無法確認必要的結束時間；也適用於 `occurrencesBetween()` 中的非重複事件。整個查詢失敗。 |
+| `RecurrenceLimitExceeded` | Occurrence 查詢評估超過 3,500 個候選；請縮小範圍。 |
+
+查詢名稱為空白或日期範圍無效時使用 PHP 的 `InvalidArgumentException`；
+JSON 編碼失敗時使用 `JsonException`。這兩種不是套件自訂例外。

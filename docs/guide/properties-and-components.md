@@ -6,7 +6,7 @@ model. These APIs preserve data instead of silently discarding it.
 
 ## Property lookup
 
-`Calendar`, `Event`, `Todo`, and `Component` expose the same direct-property methods:
+`Calendar`, `Event`, `Todo`, `Journal`, `Alarm`, and `Component` expose the same direct-property methods:
 
 ```php
 $object->properties();
@@ -26,12 +26,12 @@ the first match, while `properties()` preserves every match and its document ord
 | --- | --- | --- |
 | `name` | `string` | Uppercase property name. |
 | `type` | `string` | Value type, such as `text`, `date-time`, or `recur`. |
-| `value` | value/list/`null` | Convenient single value, or a list for repeated values. |
+| `value` | value/list/`null` | `null` for no values, the value for one, or a list for multiple values. |
 | `values` | `list<PropertyAtom>` | Every value carried by the property. |
 | `parameters()` | `array<string,string\|list<string>>` | All parameters with uppercase names. |
 | `parameter($name)` | `string\|list<string>\|null` | One case-insensitive parameter lookup. |
-| `rawValue()` | `string` | The property value as text. |
-| `toArray()` | `array` | All fields above in array form. |
+| `rawValue()` | `string` | The normalized property value as text. |
+| `toArray()` | `array` | `name`, `type`, `value`, `values`, `parameters`, and `raw_value`. |
 
 `PropertyAtom` may be `bool`, `int`, `float`, `string`, `CarbonImmutable`, `DateInterval`,
 or a structured array such as an RRULE map. `rawValue()` does not include the property name,
@@ -52,9 +52,9 @@ $fbType = $periods?->first()?->parameter('FBTYPE');
 Names are trimmed, case-insensitive, and non-empty. Lookup only examines the next level;
 `component()` returns the first match or `null`. `Component::$name` is uppercase. Generic
 components can represent `VEVENT`, `VTODO`, `VJOURNAL`, `VFREEBUSY`, `VTIMEZONE`, and
-unknown `X-*` components, including generic views of events and todos.
+unknown `X-*` components.
 
 ## Raw component access
 
-`Calendar::rawComponent()`, `Event::rawComponent()`, `Todo::rawComponent()`, and
-`Component::rawComponent()` return a Sabre component for advanced use.
+`Calendar`, `Event`, `Todo`, `Journal`, `Alarm`, and `Component` provide `rawComponent()`
+for advanced access to the corresponding Sabre component.

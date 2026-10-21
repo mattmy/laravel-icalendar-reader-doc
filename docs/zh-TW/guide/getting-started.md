@@ -67,8 +67,7 @@ echo $event->summary; // Project meeting
 echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
 
-所有讀取方法都回傳相同的 `Calendar` 類型。Collections 保留文件順序；缺少的 optional
-資料會是 `null` 或空 Collection，不會產生不存在的預設資料。
+讀取成功後會取得 `Calendar`，Collections 保留原始資料順序。
 
 ## 下一步
 
