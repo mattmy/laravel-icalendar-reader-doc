@@ -10,7 +10,7 @@
   Avoid producing multiple formats for the same large calendar unless required.
 - `rawComponent()` can be expensive for large calendars. Call it once and reuse the result.
 - `occurrencesBetween()` materializes its result and does not cache it. One query may evaluate at
-  most 3,500 occurrence candidates across all series; exceeding the limit throws
+  most 3,500 candidates across recurring and non-recurring events; exceeding the limit throws
   `RecurrenceLimitExceeded` without returning partial results. Use the narrowest practical range.
 - `eventsBetween()` and todo queries do not expand recurrence; they only return components stored
   in the `.ics` file.
@@ -23,7 +23,7 @@ explicit memory and time limits.
 
 - Validate request upload presence and authorize calendar import before calling the package.
 - Never pass an end-user-controlled server path directly to `fromPath()`.
-- The package does not fetch URLs, preventing the reader from becoming an SSRF client.
+- The package does not download URLs.
 - Client MIME type and filename are untrusted; use the returned result or exception to decide
   whether the content is a valid calendar.
 - Calendar fields can contain personal data and attacker-controlled text/URLs. Escape output,

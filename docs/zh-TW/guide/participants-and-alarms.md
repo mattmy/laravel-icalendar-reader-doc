@@ -1,15 +1,15 @@
 # 參與者與提醒
 
-Event 與 Todo 都可取得主辦人、參與者與提醒。
+Event、Todo 與 Journal 都可取得主辦人和參與者；Event 與 Todo 另提供提醒。
 
 ## Organizer
 
 `Organizer` 代表一個 `ORGANIZER` property。
 
-| Member | 型別 | 意義 |
+| 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
 | `address` | `string` | 原始 cal-address；存在時包含 `mailto:`。 |
-| `email` | `?string` | 移除大小寫不敏感的 `mailto:`；無法轉換時為 `null`。 |
+| `email` | `?string` | 移除 `mailto:` 前綴後的地址；沒有此前綴時為 `null`，比對不區分大小寫。 |
 | `name` | `?string` | `CN` parameter。 |
 | `sentBy` | `?string` | `SENT-BY` parameter。 |
 | `directory` | `?string` | `DIR` parameter。 |
@@ -19,20 +19,20 @@ Event 與 Todo 都可取得主辦人、參與者與提醒。
 
 `Attendee` 代表一個可重複的 `ATTENDEE` property，不會依 address 合併。
 
-| Member | 型別 | 意義 |
+| 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
 | `address` | `string` | 原始 cal-address。 |
-| `email`, `name` | `?string` | 正規化 email 與 `CN` 顯示名稱。 |
+| `email`, `name` | `?string` | 移除 `mailto:` 後的地址與 `CN` 顯示名稱。 |
 | `role`, `status`, `type` | `?string` | 大寫 `ROLE`、`PARTSTAT`、`CUTYPE`。 |
 | `rsvp` | `?bool` | `TRUE`、`FALSE`；缺少或無法識別時為 `null`。 |
-| `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | 全部 delegation addresses。 |
+| `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | 委派來源與對象的完整地址清單。 |
 | `parameters()` | `array<string,string\|list<string>>` | 包含未知值在內的全部 parameters。 |
 
 ## Alarm 與 trigger
 
 每個 `Alarm` 代表 Event 或 Todo 裡的一個 `VALARM`。
 
-| Member | 型別 | 意義 |
+| 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
 | `action` | `?string` | `ACTION`。 |
 | `trigger` | `?AlarmTrigger` | 相對或絕對 `TRIGGER`。 |
@@ -41,7 +41,7 @@ Event 與 Todo 都可取得主辦人、參與者與提醒。
 | `attachments` | `Collection<int, Property>` | 依原始順序保留的重複 `ATTACH` properties。 |
 | `repeat` | `?int` | `REPEAT` 次數。 |
 | `duration` | `?DateInterval` | 每次重複之間的時間。 |
-| `properties()`, `property()` | `Collection` / `?Property` | 直接屬性，包含標準與擴充欄位。 |
+| `properties()`, `property()`, `hasProperty()` | `Collection` / `?Property` / `bool` | 查詢直接屬性，或判斷屬性是否存在。 |
 | `rawComponent()` | `VAlarm` | 底層的 alarm component。 |
 
 ```php

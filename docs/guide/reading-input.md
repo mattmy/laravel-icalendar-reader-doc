@@ -57,7 +57,7 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-`$file` must be an `Illuminate\Http\UploadedFile`. Client MIME type and filename do not prove
+Pass an `Illuminate\Http\UploadedFile`. Client MIME type and filename do not prove
 that its content is valid. Validate that the request contains a file before calling this method.
 
 ## Exceptions or `null`
@@ -65,10 +65,10 @@ that its content is valid. Validate that the request contains a file before call
 | Failure | `read*()` | `try*()` |
 | --- | --- | --- |
 | Invalid iCalendar content | throws `InvalidCalendar` | returns `null` |
-| Missing/unreadable file | throws source exception | same exception |
+| Missing/unreadable file | throws `CalendarFileNotFound` / `CalendarFileUnreadable` | same exception |
 | Invalid stream/upload | throws `InvalidCalendarSource` | same exception |
 | Exceeds `max_bytes` | throws `CalendarTooLarge` | same exception |
 | Invalid `max_bytes` | throws `InvalidConfiguration` | same exception |
 
-Use `read*()` when you want details about invalid content. Use `try*()` when `null` is enough
-to tell your application that the user supplied an invalid calendar.
+Use the throwing method for details about invalid content, or its `try*()` counterpart
+when `null` is enough.

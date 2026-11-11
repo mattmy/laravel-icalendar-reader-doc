@@ -6,9 +6,9 @@
 這個例外轉為 `null`；來源、大小與設定錯誤仍會拋出各自的例外。Reader 不會修補被拒絕
 的內容。
 
-Reader 也會在建立行事曆物件前，檢查 BOOLEAN／FLOAT 值，以及基本 RRULE 的格式、
-值與組合。規則格式不合法時，讀取就會失敗；規則合法但查詢無法展開時，
-則會拋出 `UnsupportedRecurrence`。
+驗證範圍包含 BOOLEAN／FLOAT 值，以及基本 RRULE 的格式與組合。
+規則不合法時，讀取就會失敗；規則合法但無法展開時，呼叫 `occurrencesBetween()`
+會拋出 `UnsupportedRecurrence`。
 
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
@@ -26,7 +26,7 @@ try {
 
 ## CalendarIssue
 
-| Member | 型別與意義 |
+| 欄位 | 型別與說明 |
 | --- | --- |
 | `level` | `int`：`CalendarIssue::LEVEL_WARNING`（`2`）或 `CalendarIssue::LEVEL_ERROR`（`3`）。 |
 | `code` | `string`：`parser_error`、`invalid_root_component`、`validation_error`、`validation_warning`、`invalid_timezone_configuration` 或 `mapping_warning`。 |
@@ -55,7 +55,8 @@ return [
 `max_bytes` 必須是正整數，依實際讀取的位元組數限制大小，不採信用戶端提供的大小；
 無效值會拋出 `InvalidConfiguration`。
 
-`floating_timezone` 控制沒有 `Z` 或 `TZID` 的 date-times：
+`floating_timezone` 指定 DATE 值，以及沒有 `Z` 或 `TZID` 的日期時間所使用的時區。
+請使用 `Asia/Taipei` 等 IANA 時區名稱，或設為 `null`：
 
 - 套件設定為合法且非 `null` 時，使用該值。
 - 套件設定為不合法且非 `null` 時，產生警告並使用 UTC，不會改用 `app.timezone`。

@@ -53,7 +53,7 @@ UID 比對區分大小寫；單筆查詢會優先回傳重複事件的主事件�
 `occurrencesBetween()` 中的非重複事件也適用。整個查詢失敗，不會回傳部分結果。
 `occurrencesBetween()` 另可能拋出 `UnsupportedRecurrence` 或
 `RecurrenceLimitExceeded`。詳見
-[Calendar、Event 與 Todo](/zh-TW/guide/calendars-and-events)。
+[Calendar、Event、Todo 與 Journal](/zh-TW/guide/calendars-and-events)。
 
 ## 查詢 properties
 

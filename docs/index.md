@@ -3,7 +3,7 @@ layout: home
 hero:
   name: Laravel iCalendar Reader
   text: Read .ics data without losing the details
-  tagline: Query events, todos, dates, participants, alarms, properties, and components through a Laravel-friendly API.
+  tagline: Query events, todos, journals, dates, participants, alarms, properties, and components through a Laravel-friendly API.
   actions:
     - theme: brand
       text: Get started
@@ -14,7 +14,7 @@ hero:
 features:
   - title: Four explicit input types
     details: Read complete strings, local paths, streams, and Laravel uploaded files with enforced byte limits.
-  - title: Events and todos you can use directly
+  - title: Events, todos, and journals
     details: Work with immutable dates, recurring event occurrences, all-day and floating-time flags, participants, alarms, and common RFC properties.
   - title: Keep every property
     details: Inspect repeated, unknown, multi-value, vendor, recurrence, and non-event data through Property and Component.

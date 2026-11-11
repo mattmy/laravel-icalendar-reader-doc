@@ -1,6 +1,6 @@
 # Participants and alarms
 
-Events and todos expose typed organizers, attendees, and nested alarms.
+Events, todos, and journals provide organizers and attendees. Events and todos also provide alarms.
 
 ## Organizer
 
@@ -41,7 +41,7 @@ Each `Alarm` represents one `VALARM` inside an event or todo.
 | `attachments` | `Collection<int, Property>` | Repeated `ATTACH` properties in document order. |
 | `repeat` | `?int` | `REPEAT` count. |
 | `duration` | `?DateInterval` | Time between repeats. |
-| `properties()`, `property()` | `Collection` / `?Property` | Direct standard, IANA, and extension properties. |
+| `properties()`, `property()`, `hasProperty()` | `Collection` / `?Property` / `bool` | Query direct properties or check whether they exist. |
 | `rawComponent()` | `VAlarm` | The low-level alarm component. |
 
 ```php

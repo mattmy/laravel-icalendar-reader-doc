@@ -1,7 +1,7 @@
 # Getting started
 
 Laravel iCalendar Reader reads and validates `.ics` content from strings, local files, streams,
-and Laravel uploads. It gives your application a queryable `Calendar` with events, todos,
+and Laravel uploads. It gives your application a queryable `Calendar` with events, todos, journals,
 dates, participants, alarms, recurrence data, properties, and components.
 
 ## Requirements
@@ -69,11 +69,12 @@ echo $event->summary; // Project meeting
 echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
 
-Successful reads return a `Calendar`. Collections preserve document order.
+Successful reads return a `Calendar`. Its `events()`, `todos()`, and `journals()` queries
+preserve document order.
 
 ## Next steps
 
 - [Choose an input method and error strategy](/guide/reading-input).
-- [Query calendars, events, and todos](/guide/calendars-and-events).
+- [Query calendars, events, todos, and journals](/guide/calendars-and-events).
 - [Read properties and non-event components](/guide/properties-and-components).
 - [Review performance and security before large imports](/guide/performance-and-security).

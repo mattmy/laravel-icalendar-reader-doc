@@ -137,11 +137,9 @@ and warnings.
 
 ## Recurring event occurrences
 
-`occurrencesBetween()` returns the events that occur within a range: non-recurring events and
+`occurrencesBetween()` returns events overlapping the range: non-recurring events and
 recurring events expanded from `RRULE`, `RDATE`, `EXDATE`, overrides, and cancellations. The
 result is a start-time-sorted `Collection<int, Event>`.
-
-Pass the start and end of the query range:
 
 ```php
 use Carbon\CarbonImmutable;
@@ -152,8 +150,8 @@ $occurrences = $calendar->occurrencesBetween(
 );
 ```
 
-Both arguments accept `DateTimeInterface`, including native `DateTime` / `DateTimeImmutable` and
-Carbon. The query uses `[from, until)`, and `$from` must be earlier than `$until`.
+Both arguments accept `DateTimeInterface`, including Carbon. The same `[from, until)` range
+rules apply as for `eventsBetween()`.
 
 Limitations:
 

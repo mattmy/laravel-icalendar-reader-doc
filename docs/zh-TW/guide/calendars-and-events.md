@@ -135,8 +135,6 @@ $events = $calendar->eventsBetween($from, $until);
 `RRULE`、`RDATE`、`EXDATE`、override 和取消狀態展開後的重複事件。結果是依開始時間
 排序的 `Collection<int, Event>`。
 
-方法需要傳入查詢範圍的開始與結束時間：
-
 ```php
 use Carbon\CarbonImmutable;
 
@@ -146,8 +144,8 @@ $occurrences = $calendar->occurrencesBetween(
 );
 ```
 
-兩個參數都接受 `DateTimeInterface`，可直接使用 PHP 的 `DateTime`／`DateTimeImmutable`
-或 Carbon。查詢範圍採 `[from, until)`，而且 `$from` 必須早於 `$until`。
+兩個參數都接受 `DateTimeInterface`，包括 Carbon；範圍規則與 `eventsBetween()` 相同，
+採 `[from, until)`。
 
 限制：
 

@@ -3,7 +3,7 @@ layout: home
 hero:
   name: Laravel iCalendar Reader
   text: 讀取 .ics，同時保留每一項資料
-  tagline: 透過符合 Laravel 習慣的 API，查詢事件、待辦、日期、參與者、提醒、properties 與 components。
+  tagline: 透過符合 Laravel 習慣的 API，查詢事件、待辦、日誌、日期、參與者、提醒、屬性與元件。
   actions:
     - theme: brand
       text: 開始使用
@@ -14,10 +14,10 @@ hero:
 features:
   - title: 四種明確輸入方式
     details: 從完整字串、本機檔案、stream 與 Laravel 上傳檔案讀取，並限制輸入大小。
-  - title: 可直接使用的事件與待辦
+  - title: 事件、待辦與日誌
     details: 查詢日期與重複事件，取得全天標記、參與者、提醒及常用行事曆欄位。
-  - title: 保留每一項 property
-    details: 透過 Property 與 Component 取得重複、未知、多值、廠商、recurrence 與非事件資料。
+  - title: 保留完整屬性
+    details: 透過 Property 與 Component 取得重複值、未知欄位、擴充與非事件資料。
   - title: 清楚的錯誤與警告
     details: 內容不合法時可選擇拋出例外或回傳 null；讀取成功後也能查看警告。
 ---

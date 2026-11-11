@@ -6,9 +6,9 @@
 counterparts return `null` only for that exception; source, size, and configuration failures
 still throw their specific exceptions. The reader does not repair rejected content.
 
-The reader also checks BOOLEAN/FLOAT values and basic RRULE syntax, values, and combinations
-before creating calendar objects. An invalid rule is rejected when reading the calendar;
-a valid rule that the query cannot expand raises `UnsupportedRecurrence`.
+Validation includes BOOLEAN/FLOAT values and basic RRULE syntax and combinations.
+Invalid rules fail during reading; valid rules that cannot be expanded raise
+`UnsupportedRecurrence` when you call `occurrencesBetween()`.
 
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
@@ -55,7 +55,8 @@ return [
 `max_bytes` must be a positive integer. The limit is enforced against bytes actually read,
 not client-provided metadata. An invalid value throws `InvalidConfiguration`.
 
-`floating_timezone` controls date-times without `Z` or `TZID`:
+`floating_timezone` sets the timezone for DATE values and date-times without `Z` or `TZID`.
+Use an IANA timezone name, such as `Asia/Taipei`, or `null`:
 
 - A valid non-null package value is used.
 - An invalid non-null package value produces a warning and uses UTC; it does not fall back
@@ -78,7 +79,7 @@ All package exceptions implement `ICalendarException`.
 | `CalendarFileUnreadable` | An existing file or stream cannot be read. |
 | `CalendarTooLarge` | Actual input exceeds `max_bytes`. |
 | `InvalidCalendarSource` | Wrong resource type, unreadable stream mode, or invalid upload. |
-| `InvalidConfiguration` | `max_bytes` cannot be used safely. |
+| `InvalidConfiguration` | `max_bytes` is not a positive integer. |
 | `UnsupportedRecurrence` | A valid recurrence series cannot be expanded safely. |
 | `UnresolvableEventRange` | `eventsBetween()` cannot determine a required end time; also applies to non-recurring events in `occurrencesBetween()`. The entire query fails. |
 | `RecurrenceLimitExceeded` | An occurrence query evaluated more than 3,500 candidates; request a narrower range. |

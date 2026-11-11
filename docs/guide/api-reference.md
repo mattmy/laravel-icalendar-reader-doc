@@ -1,7 +1,6 @@
 # API reference
 
-This page lists the package's public operations. The linked guides explain semantics and
-errors; public readonly fields are documented in the guide for each object.
+This page lists public methods. See each object's guide for its readonly fields and examples.
 
 ## Read a calendar
 
@@ -55,7 +54,7 @@ expand recurrence rules. `occurrencesBetween()` may also throw `UnsupportedRecur
 
 `eventsBetween()` throws `UnresolvableEventRange` when a required end time cannot be determined.
 The same applies to non-recurring events in `occurrencesBetween()`. The entire query fails.
-See [Calendars, events, and todos](/guide/calendars-and-events).
+See [Calendars, events, todos, and journals](/guide/calendars-and-events).
 
 ## Query properties
 

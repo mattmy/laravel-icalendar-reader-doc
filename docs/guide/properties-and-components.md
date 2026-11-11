@@ -1,8 +1,7 @@
 # Properties and components
 
-Direct fields cover common calendar, event, and todo data. Use `Property` and `Component`
-for repeated values, vendor extensions, unknown fields, and component types without a typed
-model. These APIs preserve data instead of silently discarding it.
+Use the typed fields for common data. Use `Property` and `Component` for repeated values,
+extensions, unknown fields, and component types without a dedicated model.
 
 ## Property lookup
 

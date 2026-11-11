@@ -65,10 +65,9 @@ $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 | 情況 | `read*()` | `try*()` |
 | --- | --- | --- |
 | 不合法的 iCalendar 內容 | 拋 `InvalidCalendar` | `null` |
-| 檔案遺失／不可讀 | 來源例外 | 同一例外 |
+| 檔案遺失／不可讀 | `CalendarFileNotFound`／`CalendarFileUnreadable` | 同一例外 |
 | 無效 stream／upload | `InvalidCalendarSource` | 同一例外 |
 | 超過 `max_bytes` | `CalendarTooLarge` | 同一例外 |
 | 無效的 `max_bytes` | `InvalidConfiguration` | 同一例外 |
 
-想知道內容不合法的原因時使用 `read*()`；只需要知道使用者提供的行事曆無效時，
-使用會回傳 `null` 的 `try*()`。
+需要錯誤原因時，使用會拋出例外的方法；只需判斷內容是否合法時，使用對應的 `try*()`。

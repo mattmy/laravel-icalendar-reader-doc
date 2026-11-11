@@ -10,7 +10,7 @@
   Calendar 不要在不需要時同時產生多種格式。
 - 大型行事曆呼叫 `rawComponent()` 可能較耗資源，請取得一次後重用。
 - `occurrencesBetween()` 會建立完整查詢結果且不快取。單次查詢最多評估所有重複事件
-  合計 3,500 個候選；超過時拋出 `RecurrenceLimitExceeded`，不回傳
+  與非重複事件合計 3,500 個候選；超過時拋出 `RecurrenceLimitExceeded`，不回傳
   部分結果。請使用實際需要的最小範圍。
 - `eventsBetween()` 與 Todo 查詢不展開 recurrence，只回傳 `.ics` 中實際存在的 components。
 
