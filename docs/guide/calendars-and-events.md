@@ -22,22 +22,27 @@ $calendar->journal('entry@example.test');
 $calendar->hasJournals('entry@example.test');
 ```
 
-UID filters are exact, case-sensitive, and are not trimmed. Plural methods return every match
-in document order. Singular methods prefer the component without `RECURRENCE-ID`; when no
-master exists, they return the first matching override. A missing match returns `null`, and
-plural queries return an empty `Collection`.
+UID filters match exactly, including case and whitespace. Plural methods return matches in
+document order. Singular methods prefer the master (the component without `RECURRENCE-ID`)
+and fall back to the first matching override. With no match, singular methods return `null`
+and plural methods return an empty `Collection`.
 
 ## Journal fields
 
-`Journal` is a typed `VJOURNAL` model. It exposes `uid`, `timestamp`, `classification`,
-`createdAt`, `startsAt`, `startIsDate`, `startIsFloating`, `lastModifiedAt`, `organizer`,
-`recurrenceId`, `recurrenceIdIsDate`, `recurrenceIdIsFloating`, `sequence`, `status`, `summary`,
-`url`, `recurrenceRule`, `attachments`, `attendees`, `categories`, `comments`, `contacts`,
-`descriptions`, `exceptionDates`, `relatedTo`, `recurrenceDates`, and `requestStatuses`.
+`Journal` represents a `VJOURNAL`. It keeps recurrence properties and exposes each
+`DESCRIPTION` in `descriptions`, a `Collection<int, string>` in document order.
 
-Repeated `DESCRIPTION` values are exposed as `Collection<int, string> $descriptions` in document
-order. Journals preserve recurrence properties but do not provide alarms, range queries, or
-recurrence expansion.
+| Type | Fields |
+| --- | --- |
+| `?string` | `uid`, `classification`, `status`, `summary`, `url` |
+| `?CarbonImmutable` | `timestamp`, `createdAt`, `startsAt`, `lastModifiedAt`, `recurrenceId` |
+| `bool` | `startIsDate`, `startIsFloating`, `recurrenceIdIsDate`, `recurrenceIdIsFloating` |
+| `?int` | `sequence` |
+| `?Organizer` | `organizer` |
+| `?Property` | `recurrenceRule` |
+| `Collection<int, Attendee>` | `attendees` |
+| `Collection<int, string>` | `categories`, `comments`, `contacts`, `descriptions` |
+| `Collection<int, Property>` | `attachments`, `exceptionDates`, `relatedTo`, `recurrenceDates`, `requestStatuses` |
 
 ## Fields shared by Event and Todo
 
@@ -93,23 +98,20 @@ Do not infer an all-day event from midnight or a 24-hour duration. Use `allDay`,
 | `dueIsDate`, `dueIsFloating` | `bool` | Flags from `DUE`, or inherited from `DTSTART` when due is derived. |
 | `percentComplete` | `?int` | `PERCENT-COMPLETE`. |
 
-Todo has no implicit one-day duration. Without enough `DTSTART`, `DUE`, or `DURATION` data,
-`dueAt` and `duration` remain `null`.
+A todo can have `dueAt` without `duration`. For example, `DUE` alone sets `dueAt`, and
+`duration` is `null`. Todo has no default one-day duration.
 
 ## Date and duration behavior
 
 - UTC values retain UTC; `TZID` values use the calendar's matching `VTIMEZONE` definition.
 - DATE values map to midnight in `Calendar::$floatingTimezone`; floating DATE-TIME values use
   the same timezone.
-- An unresolved document `TZID` adds a warning and leaves the typed date field `null`; the
-  original Property remains available.
+- If a `TZID` date cannot be resolved, the date field is `null`. Check `warnings()` for details
+  and call `rawValue()` on the corresponding `Property` to inspect the source value.
 - `DTEND` is exclusive. All-day `lastDay` is one calendar day before `endsAt`.
 - If an all-day Event has neither `DTEND` nor `DURATION`, it ends at the start of the next day.
 - Derived Event end flags and Todo due flags inherit their start flags.
 - `RECURRENCE-ID` flags always describe that property itself.
-
-Recurrence properties remain available on the original Event objects. Use the occurrence query
-below when you need the concrete instances produced by those properties.
 
 ## Event range queries
 
@@ -117,29 +119,22 @@ below when you need the concrete instances produced by those properties.
 $events = $calendar->eventsBetween($from, $until);
 ```
 
-Both boundaries accept `DateTimeInterface`. The interval is half-open: `$from` is included and
-an event starting exactly at `$until` is excluded. `$from` must be earlier than `$until`, or
-`InvalidArgumentException` is thrown. Events without a usable start are excluded, and only
-VEVENT components actually present in the calendar are returned.
+`eventsBetween()` checks the VEVENT components stored in the calendar. Both boundaries accept
+`DateTimeInterface`. `$from` must be earlier than `$until`, or the query throws
+`InvalidArgumentException`.
 
-An event overlaps the range when it starts before `$until` and ends after `$from`.
-A DATE-TIME event with neither `DTEND` nor `DURATION` counts as a single point in time:
-its start must be at or after `$from` and before `$until`.
+The query skips events with no usable start and events starting at or after `$until`.
+An event with a usable end must end after `$from` to overlap the range. For a DATE-TIME event
+with neither `DTEND` nor `DURATION`, the start must fall within `[$from, $until)`.
 
-If the reader cannot determine an event's end from `DTEND`, `DURATION`, or an all-day
-event's default one-day span, it throws `UnresolvableEventRange` without returning a
-partial list. This includes events that started before `$from`, since they might still
-be running during your range.
-
-Events with no usable start, or starting at or after `$until`, are skipped without
-checking their ends. If the query fails, you can still inspect the Calendar's fields
-and warnings.
+If a remaining event needs an end and the reader cannot determine it, the whole query throws
+`UnresolvableEventRange`. An event that started before `$from` can still overlap the range.
 
 ## Recurring event occurrences
 
-`occurrencesBetween()` returns events overlapping the range: non-recurring events and
-recurring events expanded from `RRULE`, `RDATE`, `EXDATE`, overrides, and cancellations. The
-result is a start-time-sorted `Collection<int, Event>`.
+`occurrencesBetween()` returns non-recurring events and expanded VEVENT instances that overlap
+the range, sorted by start time. It uses `RRULE` and `RDATE` to generate instances and applies
+`EXDATE`, single-instance overrides, and cancellations.
 
 ```php
 use Carbon\CarbonImmutable;
@@ -150,17 +145,15 @@ $occurrences = $calendar->occurrencesBetween(
 );
 ```
 
-Both arguments accept `DateTimeInterface`, including Carbon. The same `[from, until)` range
-rules apply as for `eventsBetween()`.
+The return type is `Collection<int, Event>`. The query uses `[$from, $until)`.
+Non-recurring events follow the same rules as `eventsBetween()`. An `RDATE` with a DATE value starts at midnight in
+`Calendar::$floatingTimezone`. For a DATE-TIME series, that occurrence inherits the master’s
+length and stays a timed event. `RDATE;VALUE=PERIOD` can specify its own end or duration.
 
-Limitations:
+The query throws `UnsupportedRecurrence` if expansion needs a date it cannot resolve or a rule
+it cannot expand. Examples include `RECURRENCE-ID;RANGE=THISANDFUTURE`, `SECONDLY`, `MINUTELY`,
+`BYSECOND`, and `BYMINUTE`.
 
-- Non-recurring events use the same range rules as `eventsBetween()`. If an end time
-  cannot be determined, the query throws `UnresolvableEventRange`; if dates needed to
-  expand a recurring event cannot be determined, it throws `UnsupportedRecurrence`.
-- Only VEVENT is expanded, not VTODO or VJOURNAL.
-- One query evaluates at most 3,500 occurrence candidates; narrow large date ranges.
-- Some recurrence combinations are unsupported, including
-  `RECURRENCE-ID;RANGE=THISANDFUTURE`, multiple `RRULE` properties, SECONDLY/MINUTELY,
-  and BYSECOND/BYMINUTE. These throw `UnsupportedRecurrence` rather than silently ignoring parts.
-- Results are not added automatically to Calendar array or JSON output.
+The query throws `RecurrenceLimitExceeded` if it needs to evaluate a 3,501st candidate.
+Candidates evaluated before `$from` and candidates later excluded from the results still count.
+Either exception ends the whole query.

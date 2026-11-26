@@ -22,7 +22,8 @@ Events, todos, and journals provide organizers and attendees. Events and todos a
 | Member | Type | Meaning |
 | --- | --- | --- |
 | `address` | `string` | Original cal-address. |
-| `email`, `name` | `?string` | Address without `mailto:` and the `CN` display name. |
+| `email` | `?string` | Address without the case-insensitive `mailto:` prefix. Otherwise `null`. |
+| `name` | `?string` | `CN` display name. |
 | `role`, `status`, `type` | `?string` | Uppercase `ROLE`, `PARTSTAT`, and `CUTYPE`. |
 | `rsvp` | `?bool` | `TRUE`, `FALSE`, or `null` when absent or unrecognized. |
 | `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | Every delegation address. |
@@ -56,5 +57,4 @@ $trigger?->relatedTo();  // START, END, or null
 
 For a relative trigger, `duration()` is the offset before or after the related event or todo
 boundary, and `relatedTo()` identifies its start or end. For an absolute trigger,
-`dateTime()` is the reminder time. Use `property('TRIGGER')` for its value and parameters,
-or `rawComponent()` for the complete alarm.
+`dateTime()` gives the reminder time. Use `property('TRIGGER')` to inspect the property’s value and parameters.

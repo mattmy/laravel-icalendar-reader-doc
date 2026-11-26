@@ -1,8 +1,6 @@
 # Getting started
 
-Laravel iCalendar Reader reads and validates `.ics` content from strings, local files, streams,
-and Laravel uploads. It gives your application a queryable `Calendar` with events, todos, journals,
-dates, participants, alarms, recurrence data, properties, and components.
+Read `.ics` content into a `Calendar`, then query its events, todos, and journals.
 
 ## Requirements
 
@@ -31,10 +29,9 @@ composer require mattmy/laravel-icalendar-reader
 
 ## Configuration
 
-The package works with defaults immediately:
-
 - `max_bytes` accepts up to 10 MiB per input.
-- `floating_timezone` is `null`, so date-times without a timezone use `app.timezone`.
+- `floating_timezone` defaults to `null`. DATE values and date-times without `Z` or `TZID`
+  use `app.timezone` when it is valid.
 
 Publish `config/icalendar_reader.php` only when you need to change those values:
 
@@ -68,9 +65,6 @@ $event = $calendar->events()->sole();
 echo $event->summary; // Project meeting
 echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
-
-Successful reads return a `Calendar`. Its `events()`, `todos()`, and `journals()` queries
-preserve document order.
 
 ## Next steps
 

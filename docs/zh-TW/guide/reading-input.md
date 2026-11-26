@@ -1,6 +1,7 @@
 # 讀取輸入
 
-請依 `.ics` 資料來源選擇方法，成功時都會回傳 `Calendar`。
+依 `.ics` 資料來源選一個方法。下列每組範例都列出拋出例外的版本與對應的 `try*()`。
+讀取成功時會回傳 `Calendar`。
 
 ## 字串
 
@@ -11,8 +12,7 @@ $calendar = ICalendar::read($contents);
 $calendar = ICalendar::tryRead($contents);
 ```
 
-`$contents` 是完整的 iCalendar 內容，不是路徑或 URL。`read()` 回傳 `Calendar`；
-`tryRead()` 會在內容不是合法 iCalendar 文件時回傳 `null`。
+將完整的 `.ics` 內容傳給 `$contents`。
 
 ## 本機路徑
 
@@ -23,7 +23,7 @@ $calendar = ICalendar::fromPath($path);
 $calendar = ICalendar::tryFromPath($path);
 ```
 
-`$path` 必須是存在、可讀的一般本機檔案，URL wrapper 會被拒絕。
+`$path` 必須指向現有且可讀的一般本機檔案。
 
 ## Stream
 
@@ -43,12 +43,12 @@ try {
 }
 ```
 
-請傳入可讀的 PHP stream resource，套件會從目前位置開始讀，不會幫你回到
-開頭或關閉 stream。傳入的值不是 stream，或 stream 只能寫入時，會拋出
-`InvalidCalendarSource`，I/O 失敗則為 `CalendarFileUnreadable`。
-`tryFromStream()` 只把 `InvalidCalendar` 轉成 `null`。
+傳入可讀的 PHP 串流資源。套件從目前位置讀到串流結尾，並由呼叫端負責關閉串流。
+讀取失敗時會拋出 `CalendarFileUnreadable`。
 
 ## UploadedFile
+
+呼叫前先確認請求中有有效的 `Illuminate\Http\UploadedFile`。
 
 ```php
 use Mattmy\ICalendar\Facades\ICalendar;
@@ -57,17 +57,14 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-傳入的檔案必須是 `Illuminate\Http\UploadedFile`。用戶端提供的 MIME 與檔名不能證明
-內容合法；呼叫前應先驗證請求確實包含檔案。
-
 ## 拋出例外或回傳 `null`
 
-| 情況 | `read*()` | `try*()` |
+| 情況 | 拋出例外的方法 | `try*()` |
 | --- | --- | --- |
 | 不合法的 iCalendar 內容 | 拋 `InvalidCalendar` | `null` |
 | 檔案遺失／不可讀 | `CalendarFileNotFound`／`CalendarFileUnreadable` | 同一例外 |
-| 無效 stream／upload | `InvalidCalendarSource` | 同一例外 |
+| 無效的串流或上傳檔案 | `InvalidCalendarSource` | 同一例外 |
 | 超過 `max_bytes` | `CalendarTooLarge` | 同一例外 |
 | 無效的 `max_bytes` | `InvalidConfiguration` | 同一例外 |
 
-需要錯誤原因時，使用會拋出例外的方法；只需判斷內容是否合法時，使用對應的 `try*()`。
+需要知道錯誤原因時，使用會拋出例外的方法。只需判斷內容是否合法時，使用對應的 `try*()`。

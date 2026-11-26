@@ -22,65 +22,67 @@ $calendar->journal('entry@example.test');
 $calendar->hasJournals('entry@example.test');
 ```
 
-UID 比對區分大小寫，不會去除前後空白。複數方法依原始順序回傳所有符合的資料；單數
-方法優先回傳沒有 `RECURRENCE-ID` 的主事件（master），沒有主事件時回傳第一筆單次覆寫（override）。
-找不到單筆時回傳 `null`，複數查詢則回傳空 Collection。
+UID 必須完全相符，包含大小寫與前後空白。複數方法依原始順序回傳符合的資料。
+單筆查詢優先回傳沒有 `RECURRENCE-ID` 的主元件（master），其次取第一筆覆寫資料。
+找不到時，單筆查詢回傳 `null`，複數查詢回傳空的 `Collection`。
 
 ## Journal 欄位
 
-`Journal` 用來表示 `VJOURNAL`，提供 `uid`、`timestamp`、`classification`、
-`createdAt`、`startsAt`、`startIsDate`、`startIsFloating`、`lastModifiedAt`、`organizer`、
-`recurrenceId`、`recurrenceIdIsDate`、`recurrenceIdIsFloating`、`sequence`、`status`、`summary`、
-`url`、`recurrenceRule`、`attachments`、`attendees`、`categories`、`comments`、`contacts`、
-`descriptions`、`exceptionDates`、`relatedTo`、`recurrenceDates` 與 `requestStatuses`。
+`Journal` 代表 `VJOURNAL`，會保留重複規則相關屬性。`descriptions` 依原始順序收錄每筆
+`DESCRIPTION`。
 
-重複 `DESCRIPTION` 會依文件順序保留在 `Collection<int, string> $descriptions`。Journal
-保留 recurrence properties，但不提供 alarm、範圍查詢或 recurrence expansion。
+| 型別 | 欄位 |
+| --- | --- |
+| `?string` | `uid`、`classification`、`status`、`summary`、`url` |
+| `?CarbonImmutable` | `timestamp`、`createdAt`、`startsAt`、`lastModifiedAt`、`recurrenceId` |
+| `bool` | `startIsDate`、`startIsFloating`、`recurrenceIdIsDate`、`recurrenceIdIsFloating` |
+| `?int` | `sequence` |
+| `?Organizer` | `organizer` |
+| `?Property` | `recurrenceRule` |
+| `Collection<int, Attendee>` | `attendees` |
+| `Collection<int, string>` | `categories`、`comments`、`contacts`、`descriptions` |
+| `Collection<int, Property>` | `attachments`、`exceptionDates`、`relatedTo`、`recurrenceDates`、`requestStatuses` |
 
 ## Event 與 Todo 共用欄位
 
 | 欄位 | 型別 | 可取得的資料 |
 | --- | --- | --- |
-| `uid` | `?string` | 精確 `UID`。 |
+| `uid` | `?string` | 原始 `UID`。 |
 | `summary`, `description`, `location`, `url` | `?string` | 常用文字與 URI。 |
 | `startsAt` | `?CarbonImmutable` | 依 UTC、`TZID`、floating 或 DATE 語意解讀的 `DTSTART`。 |
 | `startIsDate` | `bool` | `DTSTART` 是否使用 `VALUE=DATE`。 |
 | `startIsFloating` | `bool` | `DTSTART` 是否為 DATE，或沒有 `TZID`／`Z` 的 DATE-TIME。 |
-| `duration` | `?DateInterval` | 明確提供或由邊界推導的有效 duration。 |
+| `duration` | `?DateInterval` | 來源提供的時長，或由起訖時間算出的時長。 |
 | `timestamp`, `createdAt`, `lastModifiedAt` | `?CarbonImmutable` | `DTSTAMP`、`CREATED`、`LAST-MODIFIED`。 |
-| `classification`, `status` | `?string` | 大寫的來源 `CLASS`、`STATUS` token。 |
-| `priority`, `sequence` | `?int` | 整數 metadata。 |
+| `classification`, `status` | `?string` | 轉為大寫的 `CLASS` 和 `STATUS`。 |
+| `priority`, `sequence` | `?int` | `PRIORITY` 和 `SEQUENCE`。 |
 | `recurrenceId` | `?CarbonImmutable` | `RECURRENCE-ID`。 |
-| `recurrenceIdIsDate`, `recurrenceIdIsFloating` | `bool` | `RECURRENCE-ID` 的來源 value type 與 floating flags。 |
-| `organizer` | `?Organizer` | 主辦人地址與 parameters。 |
+| `recurrenceIdIsDate`, `recurrenceIdIsFloating` | `bool` | `RECURRENCE-ID` 是否為 DATE，以及是否使用行事曆的浮動時區。 |
+| `organizer` | `?Organizer` | 主辦人地址與參數。 |
 | `attendees` | `Collection<int, Attendee>` | 依文件順序保留的所有 `ATTENDEE`。 |
-| `alarms` | `Collection<int, Alarm>` | Direct `VALARM` children。 |
-| `categories` | `Collection<int, string>` | 依順序展平的 `CATEGORIES` text-list values。 |
+| `alarms` | `Collection<int, Alarm>` | 此事件或待辦底下的 `VALARM`。 |
+| `categories` | `Collection<int, string>` | 將各筆 `CATEGORIES` 的值依原始順序合成一份清單。 |
 | `geo` | `?array{latitude: float, longitude: float}` | `GEO` 座標；缺少或超出座標範圍時為 `null`。 |
 | `comments`, `contacts` | `Collection<int, string>` | 每個重複 `COMMENT`／`CONTACT` 對應一個字串。 |
-| `resources` | `Collection<int, string>` | 依順序展平的 `RESOURCES` text-list values。 |
-| `recurrenceRule` | `?Property` | 第一個 `RRULE`，包含 values、parameters 與 raw text。 |
+| `resources` | `Collection<int, string>` | 將各筆 `RESOURCES` 的值依原始順序合成一份清單。 |
+| `recurrenceRule` | `?Property` | 第一筆 `RRULE`，可查看值、參數與原文。 |
 | `attachments` | `Collection<int, Property>` | 所有 `ATTACH`。 |
 | `exceptionDates` | `Collection<int, Property>` | 所有 `EXDATE`。 |
 | `requestStatuses` | `Collection<int, Property>` | 所有 `REQUEST-STATUS`。 |
 | `relatedTo` | `Collection<int, Property>` | 所有 `RELATED-TO`。 |
 | `recurrenceDates` | `Collection<int, Property>` | 所有 `RDATE`。 |
 
-這些便捷欄位不會移除原本的 Property。例如超出範圍的 GEO 座標仍能透過
-`property('GEO')` 取得；FLOAT 格式不合法則會在讀取時遭拒絕。
+座標超出範圍時，仍可透過 `property('GEO')` 取得屬性。FLOAT 格式不合法時，讀取會失敗。
 
 ## Event 專屬欄位
 
 | 欄位 | 型別 | 可取得的資料 |
 | --- | --- | --- |
-| `endsAt` | `?CarbonImmutable` | Exclusive `DTEND`，或依 duration／全天規則推導的結束。 |
-| `endIsDate`, `endIsFloating` | `bool` | 明確或推導結束值的 value type 與 floating flags。 |
+| `endsAt` | `?CarbonImmutable` | 從 `DTEND`、時長或全天規則取得的結束時間。 |
+| `endIsDate`, `endIsFloating` | `bool` | 結束值是否為 DATE，以及是否使用行事曆的浮動時區。 |
 | `allDay` | `bool` | `DTSTART` 是否使用 `VALUE=DATE`；與 `isAllDay()` 相同。 |
-| `lastDay` | `?CarbonImmutable` | 全天事件 inclusive 最後日期。 |
-| `transparency` | `?string` | 大寫的來源 `TRANSP` token；缺少時維持 `null`。 |
-
-不要用午夜或 24 小時 duration 推測全天事件；請使用 `allDay`、`startIsDate` 或
-`isAllDay()`。
+| `lastDay` | `?CarbonImmutable` | 全天事件實際涵蓋的最後一天。 |
+| `transparency` | `?string` | 轉為大寫的 `TRANSP`。未提供時為 `null`。 |
 
 ## Todo 專屬欄位
 
@@ -88,25 +90,23 @@ UID 比對區分大小寫，不會去除前後空白。複數方法依原始順�
 | --- | --- | --- |
 | `completedAt` | `?CarbonImmutable` | UTC `COMPLETED`。 |
 | `dueAt` | `?CarbonImmutable` | 明確 `DUE`，或 `DTSTART + DURATION`。 |
-| `dueIsDate`, `dueIsFloating` | `bool` | 來自 `DUE`，或 due 為推導值時繼承 `DTSTART`。 |
+| `dueIsDate`, `dueIsFloating` | `bool` | 依 `DUE` 判斷是否為 DATE 及是否使用浮動時區。由時長推算時，沿用 `DTSTART` 的標記。 |
 | `percentComplete` | `?int` | `PERCENT-COMPLETE`。 |
 
-Todo 沒有隱含的一日 duration；`DTSTART`、`DUE`、`DURATION` 資料不足時，`dueAt` 與
-`duration` 會是 `null`。
+待辦可以有截止時間而沒有時長。例如只提供 `DUE` 時，`dueAt` 有值，`duration` 為 `null`。
+待辦沒有預設的一日時長。
 
 ## 日期與 duration 行為
 
 - UTC 會保留 UTC；`TZID` 使用行事曆內相符的 `VTIMEZONE` 定義。
 - DATE 對應到 `Calendar::$floatingTimezone` 的午夜；沒有 `Z` 或 `TZID` 的
   floating DATE-TIME 也使用這個時區。
-- 文件內無法識別的 `TZID` 會產生 warning，typed 日期欄位為 `null`，原始 Property 仍保留。
-- `DTEND` 是 exclusive；全天 `lastDay` 比 `endsAt` 早一個 calendar day。
+- 無法解析 `TZID` 日期時，日期欄位為 `null`。可用 `warnings()` 查看原因，並透過
+  對應屬性的 `rawValue()` 取得原值。
+- `DTEND` 是不包含在事件內的結束時間。全天事件的 `lastDay` 是 `endsAt` 的前一天。
 - 全天 Event 如果沒有指定 `DTEND` 和 `DURATION`，就會在隔天零點結束。
-- 推導的 Event end flags 與 Todo due flags 會繼承 start flags。
-- `RECURRENCE-ID` flags 只描述該 property 本身。
-
-原始 Event 仍會保留 recurrence properties；需要這些 properties 實際產生的事件時，
-請使用下方的 occurrence 查詢。
+- 由起點推算的結束時間或截止時間沿用 `DTSTART` 的日期標記。
+- `RECURRENCE-ID` 的日期標記依該屬性的值判斷。
 
 ## Event 範圍查詢
 
@@ -114,26 +114,20 @@ Todo 沒有隱含的一日 duration；`DTSTART`、`DUE`、`DURATION` 資料不�
 $events = $calendar->eventsBetween($from, $until);
 ```
 
-兩個邊界都接受 `DateTimeInterface`。範圍採 half-open：包含 `$from`，不包含剛好從
-`$until` 開始的事件。`$from` 必須早於 `$until`，否則拋出 `InvalidArgumentException`。
-沒有可用 start 的事件會被排除，而且只回傳行事曆中實際存在的 VEVENT components。
+`eventsBetween()` 查詢行事曆原有的 VEVENT。兩個參數都接受 `DateTimeInterface`。
+`$from` 必須早於 `$until`，否則會拋出 `InvalidArgumentException`。
 
-事件在 `$until` 之前開始，而且在 `$from` 之後結束，就算與查詢範圍重疊。
-沒有 `DTEND` 和 `DURATION` 的 DATE-TIME 事件則視為單一時間點：
-開始時間必須等於或晚於 `$from`，且早於 `$until`。
+查詢會略過無法取得開始時間的事件，以及在 `$until` 或之後開始的事件。有結束時間的事件在
+`$from` 之後結束才算重疊。沒有 `DTEND` 和 `DURATION` 的 DATE-TIME 事件視為單一時間點，
+開始時間在 `$from` 當下或之後，且早於 `$until`，就會回傳。
 
-如果無法從 `DTEND`、`DURATION` 或全天事件預設的一天算出結束時間，查詢會拋出
-`UnresolvableEventRange`，不會回傳部分結果。即使事件早於 `$from` 開始也一樣，
-因為它可能還在查詢範圍內持續進行。
-
-沒有可用開始時間，或在 `$until` 當下及之後才開始的事件，會直接略過，
-不檢查結束時間。查詢失敗後，你仍可查看 Calendar 的欄位與警告。
+其餘需要結束時間的事件如果無法解析終點，整個查詢會拋出 `UnresolvableEventRange`。
+即使事件早於 `$from` 開始，也可能與查詢範圍重疊。
 
 ## 重複事件 occurrences
 
-`occurrencesBetween()` 會回傳指定範圍內實際發生的事件，包括非重複事件，以及依
-`RRULE`、`RDATE`、`EXDATE`、override 和取消狀態展開後的重複事件。結果是依開始時間
-排序的 `Collection<int, Event>`。
+`occurrencesBetween()` 回傳與查詢範圍重疊的非重複事件，以及展開後的 VEVENT，並依開始時間排序。
+套件以 `RRULE` 和 `RDATE` 產生事件，再套用 `EXDATE`、單次覆寫與取消狀態。
 
 ```php
 use Carbon\CarbonImmutable;
@@ -144,17 +138,14 @@ $occurrences = $calendar->occurrencesBetween(
 );
 ```
 
-兩個參數都接受 `DateTimeInterface`，包括 Carbon；範圍規則與 `eventsBetween()` 相同，
-採 `[from, until)`。
+回傳型別為 `Collection<int, Event>`，查詢區間為 `[$from, $until)`。
+非重複事件沿用 `eventsBetween()` 的判斷規則。
+DATE 型別的 `RDATE` 從 `Calendar::$floatingTimezone` 的當日零點開始。如果主事件使用
+DATE-TIME，這筆事件會繼承主事件的時長並維持 DATE-TIME 型別。
+`RDATE;VALUE=PERIOD` 可以指定這筆事件自己的結束時間或時長。
 
-限制：
+無法解析展開所需的日期，或遇到套件無法展開的規則時，查詢會拋出 `UnsupportedRecurrence`。
+例如 `RECURRENCE-ID;RANGE=THISANDFUTURE`、`SECONDLY`、`MINUTELY`、`BYSECOND` 和 `BYMINUTE`。
 
-- 非重複事件的範圍判斷與 `eventsBetween()` 相同。無法確認結束時間時，
-  查詢會拋出 `UnresolvableEventRange`；如果無法確認展開重複事件所需的日期，
-  則拋出 `UnsupportedRecurrence`。
-- 只展開 VEVENT，不展開 VTODO 或 VJOURNAL。
-- 單次查詢最多評估 3,500 個 occurrence candidates，範圍過大時應縮小日期區間。
-- 部分 recurrence 組合不支援，例如 `RECURRENCE-ID;RANGE=THISANDFUTURE` 或多個
-  `RRULE`，以及 SECONDLY／MINUTELY、BYSECOND／BYMINUTE；會拋出 `UnsupportedRecurrence`，
-  不會靜默忽略規則。
-- 查詢結果不會自動加入 Calendar 的 array 或 JSON 輸出。
+查詢評估超過 3,500 個候選時，會拋出 `RecurrenceLimitExceeded`。在 `$from` 之前評估的候選，
+以及後續被排除的候選，也會計入。這兩種例外都會讓整個查詢失敗。

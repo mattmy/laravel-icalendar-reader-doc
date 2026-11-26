@@ -38,7 +38,7 @@ $calendar->occurrencesBetween(DateTimeInterface $from, DateTimeInterface $until)
 $calendar->warnings(): Collection
 ```
 
-- `events()`, `todos()`, and `journals()` return all components, or every exact UID match, in document order.
+- `events()`, `todos()`, and `journals()` return their respective models in document order. Pass a UID to filter.
 - `hasEvents()`, `hasTodos()`, and `hasJournals()` test whether any component or UID match exists.
 - `event()`, `todo()`, and `journal()` return one exact UID match or `null`.
 - `eventsBetween()` returns events overlapping the requested half-open interval.
@@ -95,7 +95,7 @@ $component->components(?string $name = null): Collection
 - `hasComponent()` tests whether the Calendar has any direct child or name match.
 - `component()` returns the Calendar's first name match or `null`.
 
-Component names are case-insensitive and only direct children are examined.
+Component name matching ignores case.
 
 ## Event and alarm helpers
 
@@ -148,6 +148,6 @@ $exception->issues(): Collection
 ```
 
 - `CalendarIssue::toArray()` and `jsonSerialize()` return one issue's seven fields.
-- `InvalidCalendar::issues()` returns every reason the content was rejected.
+- `InvalidCalendar::issues()` returns the diagnostics reported for the failed read.
 
 See [Validation and configuration](/guide/validation-and-configuration).

@@ -2,12 +2,10 @@
 
 ## Calendar output
 
-`Calendar::toArray()` returns snake_case calendar metadata plus `events`, `todos`, `journals`,
-and `warnings`. Events, todos, and journals include their applicable public fields,
-recurrence data, organizers, attendees, and repeated values; events and todos also include
-alarms. Typed date and duration fields become strings; missing values remain `null`, and
-repeated values remain lists. Generic Property values keep their PHP types, including
-`CarbonImmutable` and `DateInterval`, in `toArray()` and `toComponentArray()`.
+`Calendar::toArray()` returns calendar metadata, `events`, `todos`, `journals`, and `warnings`
+with snake_case keys. Date and duration fields such as `starts_at` and `duration` become strings.
+Missing values stay `null`, and repeated values stay in lists. In both array formats, values
+inside a `Property` keep their PHP types, including `CarbonImmutable` and `DateInterval`.
 
 ```php
 $payload = $calendar->toArray();
@@ -37,9 +35,7 @@ normal PHP `json_encode()` options and throws `JsonException` if conversion fail
 `Calendar::toComponentArray()` recursively returns each component's `name`, `properties`,
 and `components`. It preserves repeated, unknown, vendor, and non-event data.
 
-Calling `occurrencesBetween()` does not add an `occurrences` key to Calendar array or JSON
-output. Use the returned Event collection directly when you need expanded instances.
+Use the `Collection` returned by `occurrencesBetween()` for expanded events. Calendar array and
+JSON output contain the original events.
 
-Use `toArray()` for convenient Calendar, Event, Todo, and Journal data. Use
-`toComponentArray()` when the complete component tree matters. Neither recreates the original
-`.ics` bytes: line folding, casing, newline style, and byte formatting are not retained.
+Both formats normalize `.ics` data, so the original line folding, property name casing, and line endings are lost.

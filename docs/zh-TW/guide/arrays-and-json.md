@@ -2,11 +2,10 @@
 
 ## Calendar 輸出
 
-`Calendar::toArray()` 回傳 snake_case Calendar metadata，以及 `events`、`todos`、
-`journals`、`warnings`。Event、Todo 與 Journal 包含各自適用的公開欄位、recurrence 資料、
-主辦人、參與者與重複值；Event 與 Todo 另包含提醒。日期與 duration 便捷欄位會轉為
-字串；缺值保留 `null`，重複值保留 list。`toArray()` 與 `toComponentArray()` 中的
-generic Property 值仍保留 PHP 型別，包括 `CarbonImmutable` 與 `DateInterval`。
+`Calendar::toArray()` 回傳行事曆基本資料、`events`、`todos`、`journals` 和 `warnings`，
+鍵名使用 snake_case。`starts_at`、`duration` 等日期與時長欄位會轉為字串。缺值保留 `null`，
+重複值保留為清單。兩種陣列輸出中的 `Property` 值都保留原有的 PHP 型別，例如
+`CarbonImmutable` 與 `DateInterval`。
 
 ```php
 $payload = $calendar->toArray();
@@ -14,11 +13,11 @@ $json = $calendar->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 ```
 
 `jsonSerialize()` 回傳與 `toArray()` 相同的資料。`toJson(int $options = 0)` 可接受一般
-PHP `json_encode()` 選項；轉換失敗會拋出 `JsonException`。
+PHP `json_encode()` 選項。編碼失敗會拋出 `JsonException`。
 
 ## 單一 generic property
 
-`Property::toArray()` 回傳與完整 component 輸出相同的 property 結構：
+`Property::toArray()` 與完整元件輸出使用相同的屬性結構。
 
 ```php
 [
@@ -33,12 +32,10 @@ PHP `json_encode()` 選項；轉換失敗會拋出 `JsonException`。
 
 ## 完整 component 輸出
 
-`Calendar::toComponentArray()` 會遞迴回傳每個 component 的 `name`、`properties` 與
-`components`，保留重複、未知、vendor 與非 Event 資料。
+`Calendar::toComponentArray()` 會遞迴回傳各元件的 `name`、`properties` 與 `components`，
+保留重複屬性、未知及廠商擴充資料，也包含事件以外的元件。
 
-呼叫 `occurrencesBetween()` 不會在 Calendar array 或 JSON 輸出加入 `occurrences`
-key；需要展開後的 instances 時，請直接使用該方法回傳的 Event Collection。
+需要展開後的事件時，請使用 `occurrencesBetween()` 回傳的 `Collection`。行事曆的陣列與
+JSON 輸出使用原本的事件資料。
 
-需要方便使用的 Calendar、Event、Todo 與 Journal 資料時選 `toArray()`；需要完整
-component tree 時選 `toComponentArray()`。兩者都無法還原原始 `.ics` bytes，包括
-line folding、大小寫、換行樣式與 byte formatting。
+兩種輸出都會正規化 `.ics` 資料，原有的折行、屬性名稱的大小寫及換行樣式無法還原。

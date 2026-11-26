@@ -1,6 +1,6 @@
 # API 參考
 
-本頁列出公開方法；各物件的公開唯讀欄位與使用方式，請看對應指南。
+各物件的唯讀欄位與用法請見對應指南。
 
 ## 讀取行事曆
 
@@ -43,11 +43,11 @@ $calendar->warnings(): Collection
 - `event()`、`todo()` 與 `journal()` 回傳一筆完全符合 UID 的資料，找不到時為 `null`。
 - `eventsBetween()` 回傳與指定範圍重疊的事件。
 - `occurrencesBetween()` 回傳與相同範圍重疊的非重複事件及展開後的重複事件。
-- `warnings()` 回傳讀取後的警告。
+- `warnings()` 回傳讀取成功後的警告。
 
-UID 比對區分大小寫；單筆查詢會優先回傳重複事件的主事件（master）。
-兩種範圍查詢都接受 `DateTimeInterface`（包括 Carbon）；`$from` 不早於 `$until` 時
-會拋出 `InvalidArgumentException`。`eventsBetween()` 不會展開重複事件。
+UID 比對區分大小寫。單筆查詢優先回傳沒有 `RECURRENCE-ID` 的主元件（master）。
+兩種範圍查詢都接受 `DateTimeInterface`（包括 Carbon）。`$from` 必須早於 `$until`，
+否則會拋出 `InvalidArgumentException`。`eventsBetween()` 只查原有的事件。
 
 `eventsBetween()` 無法確認必要的結束時間時，會拋出 `UnresolvableEventRange`；
 `occurrencesBetween()` 中的非重複事件也適用。整個查詢失敗，不會回傳部分結果。
@@ -76,7 +76,7 @@ $organizer->parameters(): array
 $attendee->parameters(): array
 ```
 
-屬性名稱不區分大小寫，只查直接屬性；單筆查詢回傳第一筆，找不到時為 `null`。
+查詢只比對物件本身的屬性，名稱不分大小寫。單筆查詢回傳第一筆，找不到時回傳 `null`。
 參數會保留多個值，`rawValue()` 回傳正規化後的文字值。詳見
 [Property 與 Component](/zh-TW/guide/properties-and-components)。
 
@@ -89,11 +89,11 @@ $calendar->component(string $name): ?Component
 $component->components(?string $name = null): Collection
 ```
 
-- `components()` 回傳全部直接子層，或所有名稱符合的資料。
-- `hasComponent()` 判斷 Calendar 是否有子層資料，或是否有名稱符合的資料。
+- `components()` 回傳直接子元件，可依名稱篩選。
+- `hasComponent()` 檢查 `Calendar` 是否有符合條件的直接子元件。
 - `component()` 回傳 Calendar 中第一筆名稱符合的資料，找不到時為 `null`。
 
-Component 名稱不區分大小寫，而且只查直接子層。
+比對元件名稱時不區分大小寫。
 
 ## Event 與 Alarm helpers
 
@@ -106,13 +106,13 @@ $trigger->dateTime(): ?CarbonImmutable
 $trigger->relatedTo(): ?string
 ```
 
-- `isAllDay()` 判斷 `DTSTART` 是否使用 DATE value type。
-- `isRelative()` 與 `isAbsolute()` 判斷 trigger 形式。
-- `duration()` 回傳相對 trigger offset，否則為 `null`。
-- `dateTime()` 回傳絕對 trigger time，否則為 `null`。
-- `relatedTo()` 回傳 `START`、`END`；絕對 trigger 時為 `null`。
+- `isAllDay()` 判斷 `DTSTART` 是否使用 DATE 型別。
+- `isRelative()` 與 `isAbsolute()` 判斷提醒時間是相對偏移還是指定時刻。
+- `duration()` 回傳相對提醒的時間偏移，否則為 `null`。
+- `dateTime()` 回傳提醒指定的確切時刻，否則為 `null`。
+- `relatedTo()` 相對提醒回傳 `START` 或 `END`，指定時刻的提醒回傳 `null`。
 
-相對與絕對 trigger 行為請看
+提醒時間的用法請見
 [參與者與提醒](/zh-TW/guide/participants-and-alarms)。
 
 ## 轉換或取得完整資料
@@ -131,9 +131,9 @@ $component->rawComponent(): SabreComponent
 ```
 
 - `toArray()` 與 `jsonSerialize()` 回傳 Calendar、Event、Todo、Journal 與警告資料。
-- `toJson()` 使用指定 PHP options 將相同資料編碼為 JSON。
-- `toComponentArray()` 回傳完整 property 與 component tree。
-- `rawComponent()` 回傳對應的 Sabre component，供進階用途使用。
+- `toJson()` 使用指定的 PHP 選項將資料編碼為 JSON。
+- `toComponentArray()` 回傳完整的屬性與元件階層。
+- `rawComponent()` 回傳對應的 Sabre 元件。
 
 詳見 [Array 與 JSON](/zh-TW/guide/arrays-and-json)。
 
@@ -145,7 +145,7 @@ $issue->jsonSerialize(): array
 $exception->issues(): Collection
 ```
 
-- `CalendarIssue::toArray()` 與 `jsonSerialize()` 回傳一筆 issue 的七個欄位。
-- `InvalidCalendar::issues()` 回傳內容遭拒絕的所有原因。
+- `CalendarIssue::toArray()` 與 `jsonSerialize()` 回傳單筆問題的七個欄位。
+- `InvalidCalendar::issues()` 回傳讀取失敗時報告的問題。
 
 詳見[驗證與設定](/zh-TW/guide/validation-and-configuration)。

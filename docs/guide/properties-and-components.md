@@ -15,9 +15,10 @@ $object->hasProperty('RRULE');
 $object->property('SUMMARY');
 ```
 
-Names are trimmed and compared case-insensitively. `null` means every direct property; an
-empty name throws `InvalidArgumentException`. Lookup never recurses. `property()` returns
-the first match, while `properties()` preserves every match and its document order.
+Names are trimmed and compared case-insensitively. A blank name throws `InvalidArgumentException`.
+These methods check the object’s own properties. `properties()` returns matches in document order
+and `hasProperty()` checks whether a match exists. Omit the name or pass `null` to check all properties.
+`property()` returns the first match, or `null` if there is none.
 
 ## Property values
 
@@ -25,16 +26,20 @@ the first match, while `properties()` preserves every match and its document ord
 | --- | --- | --- |
 | `name` | `string` | Uppercase property name. |
 | `type` | `string` | Value type, such as `text`, `date-time`, or `recur`. |
-| `value` | value/list/`null` | `null` for no values, the value for one, or a list for multiple values. |
-| `values` | `list<PropertyAtom>` | Every value carried by the property. |
+| `value` | `PropertyAtom\|list<PropertyAtom>\|null` | One mapped value, a list of mapped values, or `null` when none are available. |
+| `values` | `list<PropertyAtom>` | Mapped values in order. |
 | `parameters()` | `array<string,string\|list<string>>` | All parameters with uppercase names. |
-| `parameter($name)` | `string\|list<string>\|null` | One case-insensitive parameter lookup. |
+| `parameter($name)` | `string\|list<string>\|null` | Trims the name and matches without regard to case. Returns `null` if the parameter is missing. A blank name throws `InvalidArgumentException`. |
 | `rawValue()` | `string` | The normalized property value as text. |
 | `toArray()` | `array` | `name`, `type`, `value`, `values`, `parameters`, and `raw_value`. |
 
 `PropertyAtom` may be `bool`, `int`, `float`, `string`, `CarbonImmutable`, `DateInterval`,
-or a structured array such as an RRULE map. `rawValue()` does not include the property name,
-parameters, or original line folding.
+or a structured array such as an RRULE map. `rawValue()` returns the value without the property
+name, parameters, or original line folding.
+
+When a duration property cannot be represented as a `DateInterval`, `value` is `null` and
+`values` is `[]`. Check `Calendar::warnings()` for a `mapping_warning` and `rawValue()` for the
+source value.
 
 ## Component lookup
 
@@ -48,10 +53,9 @@ $periods = $freeBusy?->properties('FREEBUSY');
 $fbType = $periods?->first()?->parameter('FBTYPE');
 ```
 
-Names are trimmed, case-insensitive, and non-empty. Lookup only examines the next level;
-`component()` returns the first match or `null`. `Component::$name` is uppercase. Generic
-components can represent `VEVENT`, `VTODO`, `VJOURNAL`, `VFREEBUSY`, `VTIMEZONE`, and
-unknown `X-*` components.
+Component lookups use the same name rules as property lookups. `component()` returns the first
+match or `null`. `Component::$name` is uppercase. A `Component` can represent standard types
+such as `VFREEBUSY` or extensions such as `X-*`.
 
 ## Raw component access
 

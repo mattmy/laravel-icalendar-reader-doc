@@ -15,9 +15,10 @@ $object->hasProperty('RRULE');
 $object->property('SUMMARY');
 ```
 
-名稱會去除前後空白，比對時不區分大小寫。省略名稱或傳入 `null` 時查詢全部直接屬性；
-空白名稱會拋出 `InvalidArgumentException`。查詢不遞迴；`property()` 取第一筆，
-`properties()` 則保留全部符合的資料與原始順序。
+名稱會去除前後空白，比對時不區分大小寫。空白名稱會拋出 `InvalidArgumentException`。
+這些方法只查物件本身的屬性。`properties()` 依原始順序回傳符合的屬性，`hasProperty()`
+檢查是否有符合的屬性，兩者都可省略名稱或傳入 `null` 以取消名稱篩選。`property()` 回傳第一筆，
+找不到時回傳 `null`。
 
 ## Property 值
 
@@ -25,22 +26,25 @@ $object->property('SUMMARY');
 | --- | --- | --- |
 | `name` | `string` | 大寫屬性名稱。 |
 | `type` | `string` | 值類型，例如 `text`、`date-time` 或 `recur`。 |
-| `value` | value/list/`null` | 沒有值時為 `null`，一個值時直接回傳，多個值時為 list。 |
-| `values` | `list<PropertyAtom>` | 這個屬性的全部值。 |
-| `parameters()` | `array<string,string\|list<string>>` | 全部 parameters，名稱為大寫。 |
-| `parameter($name)` | `string\|list<string>\|null` | 依名稱取得參數，比對不區分大小寫。 |
-| `rawValue()` | `string` | 正規化後的 Property 文字值。 |
+| `value` | `PropertyAtom\|list<PropertyAtom>\|null` | 一個轉換後的值會直接回傳，多個值會回傳清單，沒有可用值時為 `null`。 |
+| `values` | `list<PropertyAtom>` | 依序列出轉換後的值。 |
+| `parameters()` | `array<string,string\|list<string>>` | 所有參數，名稱為大寫。 |
+| `parameter($name)` | `string\|list<string>\|null` | 依名稱查詢參數，會去除前後空白且不分大小寫。找不到時回傳 `null`，空白名稱會拋出 `InvalidArgumentException`。 |
+| `rawValue()` | `string` | 正規化後的屬性文字值。 |
 | `toArray()` | `array` | 包含 `name`、`type`、`value`、`values`、`parameters` 與 `raw_value`。 |
 
 `PropertyAtom` 可能是 `bool`、`int`、`float`、`string`、`CarbonImmutable`、
 `DateInterval` 或 RRULE 對照表等結構化陣列。`rawValue()` 不包含屬性名稱、
 參數或原始折行格式。
 
+時長無法轉成 `DateInterval` 時，`value` 為 `null`，`values` 為 `[]`。可用
+`Calendar::warnings()` 查看 `mapping_warning`，並透過 `rawValue()` 取得原值。
+
 ## Component 查詢
 
-`Calendar` 以 `components(?string $name = null)`、`hasComponent(?string $name = null)`、
-`component(string $name)` 查詢第一層子 components；generic `Component` 則以
-`components(?string $name = null)` 查詢自己的第一層子 components。
+`Calendar` 提供 `components(?string $name = null)`、`hasComponent(?string $name = null)`
+與 `component(string $name)`，用來查詢直接子元件。`Component` 可用 `components(?string $name = null)`
+查詢自己的直接子元件。
 
 ```php
 $freeBusy = $calendar->component('VFREEBUSY');
@@ -48,12 +52,10 @@ $periods = $freeBusy?->properties('FREEBUSY');
 $fbType = $periods?->first()?->parameter('FBTYPE');
 ```
 
-名稱會去除前後空白，比對不區分大小寫，且不可為空白。查詢只看直接子層；
-`component()` 取第一筆，找不到時回傳 `null`。`Component::$name` 為大寫，可代表
-`VEVENT`、`VTODO`、`VJOURNAL`、`VFREEBUSY`、`VTIMEZONE`
-及未知 `X-*` components。
+元件名稱的比對規則與屬性相同。`component()` 回傳第一筆，找不到時為 `null`。
+`Component::$name` 為大寫。`Component` 可代表 `VFREEBUSY` 等標準元件，也能存取 `X-*` 擴充元件。
 
 ## Raw component 存取
 
 `Calendar`、`Event`、`Todo`、`Journal`、`Alarm` 與 `Component` 都提供 `rawComponent()`，
-可取得對應的 Sabre component，供進階用途使用。
+可取得對應的 Sabre 元件。

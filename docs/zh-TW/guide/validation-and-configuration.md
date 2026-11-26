@@ -2,13 +2,11 @@
 
 ## 不合法內容與警告
 
-不合法的 iCalendar 內容會讓 `read*()` 拋出 `InvalidCalendar`。對應的 `try*()` 只會把
-這個例外轉為 `null`；來源、大小與設定錯誤仍會拋出各自的例外。Reader 不會修補被拒絕
-的內容。
+每次讀取接受一個 `VCALENDAR`。內容不合法時會拋出 `InvalidCalendar`，使用 `try*()`
+則會回傳 `null`。來源、大小與設定錯誤仍會拋出各自的例外。套件不會修補不合法的內容。
 
-驗證範圍包含 BOOLEAN／FLOAT 值，以及基本 RRULE 的格式與組合。
-規則不合法時，讀取就會失敗；規則合法但無法展開時，呼叫 `occurrencesBetween()`
-會拋出 `UnsupportedRecurrence`。
+套件會檢查 BOOLEAN、FLOAT 等值，以及基本 RRULE 的格式與組合。合法的規則仍可讀取。
+遇到套件無法展開的規則時，`occurrencesBetween()` 會拋出 `UnsupportedRecurrence`。
 
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
@@ -21,8 +19,8 @@ try {
 }
 ```
 
-`issues()` 說明內容遭拒絕的原因；`$calendar->warnings()` 回報仍可讀取的內容或設定問題。
-兩者都回傳 `Collection<int, CalendarIssue>`。
+讀取失敗時，用 `issues()` 查看驗證回報的問題。讀取成功後，可用 `$calendar->warnings()`
+查看內容或設定中的警告。兩者都回傳 `Collection<int, CalendarIssue>`。
 
 ## CalendarIssue
 
@@ -35,7 +33,7 @@ try {
 | `line` | `?int`：來源行號，無法取得時為 `null`。 |
 | `component`, `property` | `?string`：相關的 iCalendar 名稱，無法取得時為 `null`。 |
 
-`toArray()` 與 `jsonSerialize()` 都回傳相同的七個固定 keys。
+`toArray()` 與 `jsonSerialize()` 都回傳表中的七個欄位。
 
 ## 設定
 
@@ -52,19 +50,17 @@ return [
 ];
 ```
 
-`max_bytes` 必須是正整數，依實際讀取的位元組數限制大小，不採信用戶端提供的大小；
-無效值會拋出 `InvalidConfiguration`。
+`max_bytes` 必須是正整數。套件以實際讀取的位元組數判斷是否超過上限。
+設定值無效時，會拋出 `InvalidConfiguration`。
 
 `floating_timezone` 指定 DATE 值，以及沒有 `Z` 或 `TZID` 的日期時間所使用的時區。
 請使用 `Asia/Taipei` 等 IANA 時區名稱，或設為 `null`：
 
-- 套件設定為合法且非 `null` 時，使用該值。
-- 套件設定為不合法且非 `null` 時，產生警告並使用 UTC，不會改用 `app.timezone`。
-- 套件設定為 `null` 時，使用合法的 `app.timezone`。
-- 套件設定為 `null` 且 `app.timezone` 不合法時，產生警告並使用 UTC。
+- 有效的時區名稱會覆寫 `app.timezone`。
+- `null` 以外的無效值會改用 UTC 並回報警告。
+- `null` 會沿用 `app.timezone`。若 `app.timezone` 無效，則改用 UTC 並回報警告。
 
-套件在所有情況都會驗證 `app.timezone`，因此即使合法的套件設定已覆寫它，不合法的
-應用程式設定仍會顯示為警告。
+即使套件使用自己的時區，無效的 `app.timezone` 仍會出現在警告中。
 
 ## 例外參考
 
@@ -72,15 +68,15 @@ return [
 
 | 例外 | 意義 |
 | --- | --- |
-| `InvalidCalendar` | 語法、root 或 validation 錯誤；可查 `issues()`。 |
+| `InvalidCalendar` | 語法、根元件或其他驗證錯誤。可透過 `issues()` 查看原因。 |
 | `CalendarFileNotFound` | 本機檔案或上傳暫存檔不存在。 |
-| `CalendarFileUnreadable` | 已存在的檔案或 stream 無法讀取。 |
+| `CalendarFileUnreadable` | 無法讀取檔案或串流。 |
 | `CalendarTooLarge` | 實際輸入超過 `max_bytes`。 |
-| `InvalidCalendarSource` | 傳入的值不是可讀 stream，或上傳檔案無效。 |
+| `InvalidCalendarSource` | 傳入的值不是可讀串流，或上傳檔案無效。 |
 | `InvalidConfiguration` | `max_bytes` 不是正整數。 |
-| `UnsupportedRecurrence` | 合法的重複事件規則無法安全展開。 |
+| `UnsupportedRecurrence` | 套件無法展開重複事件規則，或無法解析展開所需的日期。 |
 | `UnresolvableEventRange` | `eventsBetween()` 無法確認必要的結束時間；也適用於 `occurrencesBetween()` 中的非重複事件。整個查詢失敗。 |
-| `RecurrenceLimitExceeded` | Occurrence 查詢評估超過 3,500 個候選；請縮小範圍。 |
+| `RecurrenceLimitExceeded` | 重複事件查詢超過 3,500 個候選的上限。 |
 
-查詢名稱為空白或日期範圍無效時使用 PHP 的 `InvalidArgumentException`；
-JSON 編碼失敗時使用 `JsonException`。這兩種不是套件自訂例外。
+查詢名稱為空白或日期範圍無效時，會拋出 PHP 的 `InvalidArgumentException`。
+JSON 編碼失敗時會拋出 `JsonException`。

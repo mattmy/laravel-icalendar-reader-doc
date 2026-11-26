@@ -1,6 +1,7 @@
 # Reading input
 
-Choose a method based on where the `.ics` data comes from. Successful reads return a `Calendar`.
+Choose one method for your input source. Each pair below shows the throwing and `try*()` variants.
+A successful read returns a `Calendar`.
 
 ## String contents
 
@@ -11,8 +12,7 @@ $calendar = ICalendar::read($contents);
 $calendar = ICalendar::tryRead($contents);
 ```
 
-`$contents` is the complete iCalendar byte string, not a path or URL. `read()` returns
-`Calendar`; `tryRead()` returns `null` when the content is not a valid iCalendar document.
+Pass the complete `.ics` contents in `$contents`.
 
 ## Local path
 
@@ -23,7 +23,7 @@ $calendar = ICalendar::fromPath($path);
 $calendar = ICalendar::tryFromPath($path);
 ```
 
-`$path` must identify an existing, readable, regular local file. URL wrappers are rejected.
+`$path` must point to an existing, readable, regular local file.
 
 ## Stream
 
@@ -43,12 +43,12 @@ try {
 }
 ```
 
-Pass a readable PHP stream resource. Reading starts from its current position.
-The package does not rewind or close the stream for you. Passing a non-stream or write-only
-stream throws `InvalidCalendarSource`; an I/O failure throws
-`CalendarFileUnreadable`. `tryFromStream()` only converts `InvalidCalendar` to `null`.
+Pass a readable PHP stream resource. The reader starts at the current position and reads to EOF.
+Close the stream when you’re done. An I/O failure throws `CalendarFileUnreadable`.
 
 ## UploadedFile
+
+Check that the request contains a valid `Illuminate\Http\UploadedFile` before calling either method.
 
 ```php
 use Mattmy\ICalendar\Facades\ICalendar;
@@ -57,12 +57,9 @@ $calendar = ICalendar::fromUploadedFile($request->file('calendar'));
 $calendar = ICalendar::tryFromUploadedFile($request->file('calendar'));
 ```
 
-Pass an `Illuminate\Http\UploadedFile`. Client MIME type and filename do not prove
-that its content is valid. Validate that the request contains a file before calling this method.
-
 ## Exceptions or `null`
 
-| Failure | `read*()` | `try*()` |
+| Failure | Throwing methods | `try*()` |
 | --- | --- | --- |
 | Invalid iCalendar content | throws `InvalidCalendar` | returns `null` |
 | Missing/unreadable file | throws `CalendarFileNotFound` / `CalendarFileUnreadable` | same exception |

@@ -1,8 +1,6 @@
 # 開始使用
 
-Laravel iCalendar Reader 可從字串、本機檔案、stream 與 Laravel 上傳檔案讀取並驗證
-`.ics` 內容，再透過 `Calendar` 查詢事件、待辦、日誌、日期、參與者、提醒、
-重複事件資料、屬性與元件。
+讀取 `.ics` 內容後，可透過 `Calendar` 查詢事件、待辦與日誌。
 
 ## 系統需求
 
@@ -11,7 +9,7 @@ Laravel iCalendar Reader 可從字串、本機檔案、stream 與 Laravel 上傳
 | PHP | PHP 8.x 系列的 8.2 以上版本 | 8.2、8.3、8.4、8.5 |
 | Laravel | 11、12、13 | 11、12、13 |
 
-必要的 PHP extensions：
+需要以下 PHP 擴充模組。
 
 - DOM（`ext-dom`）
 - JSON（`ext-json`）
@@ -19,8 +17,8 @@ Laravel iCalendar Reader 可從字串、本機檔案、stream 與 Laravel 上傳
 - XMLReader（`ext-xmlreader`）
 - XMLWriter（`ext-xmlwriter`）
 
-Composer 也會透過 `lib-libxml` platform package 要求 libxml 2.6.20 以上版本。這些需求
-來自 Sabre/VObject 5 與 Sabre/XML；套件不需要資料庫、migration 或外部服務。
+Composer 也會透過 `lib-libxml` 檢查 libxml 是否為 2.6.20 以上版本。這些需求來自
+Sabre/VObject 5 與 Sabre/XML。套件不需要資料庫、資料庫遷移或外部服務。
 
 ## 安裝
 
@@ -30,10 +28,9 @@ composer require mattmy/laravel-icalendar-reader
 
 ## 設定
 
-套件可直接使用預設值：
-
-- `max_bytes`：每次最多接受 10 MiB 輸入。
-- `floating_timezone`：預設為 `null`，沒有時區的 date-time 使用 `app.timezone`。
+- `max_bytes` 預設限制每次輸入最多 10 MiB。
+- `floating_timezone` 預設為 `null`。`app.timezone` 有效時，DATE 值和沒有 `Z` 或 `TZID`
+  的日期時間會使用這個時區。
 
 只有需要調整時才發布 `config/icalendar_reader.php`：
 
@@ -66,8 +63,6 @@ $event = $calendar->events()->sole();
 echo $event->summary; // Project meeting
 echo $event->startsAt?->toIso8601String(); // 2026-08-10T09:00:00+00:00
 ```
-
-讀取成功後會取得 `Calendar`；`events()`、`todos()` 與 `journals()` 保留原始資料順序。
 
 ## 下一步
 

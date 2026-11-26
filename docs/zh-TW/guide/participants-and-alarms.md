@@ -1,6 +1,6 @@
 # 參與者與提醒
 
-Event、Todo 與 Journal 都可取得主辦人和參與者；Event 與 Todo 另提供提醒。
+事件、待辦與日誌都可取得主辦人和參與者。事件與待辦另有提醒。
 
 ## Organizer
 
@@ -8,25 +8,26 @@ Event、Todo 與 Journal 都可取得主辦人和參與者；Event 與 Todo 另�
 
 | 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
-| `address` | `string` | 原始 cal-address；存在時包含 `mailto:`。 |
-| `email` | `?string` | 移除 `mailto:` 前綴後的地址；沒有此前綴時為 `null`，比對不區分大小寫。 |
-| `name` | `?string` | `CN` parameter。 |
-| `sentBy` | `?string` | `SENT-BY` parameter。 |
-| `directory` | `?string` | `DIR` parameter。 |
-| `parameters()` | `array<string,string\|list<string>>` | 包含未知值在內的全部 parameters。 |
+| `address` | `string` | 行事曆地址，包含原有的 `mailto:` 前綴。 |
+| `email` | `?string` | 移除 `mailto:` 前綴後的地址。前綴不分大小寫，沒有前綴時為 `null`。 |
+| `name` | `?string` | `CN` 參數。 |
+| `sentBy` | `?string` | `SENT-BY` 參數。 |
+| `directory` | `?string` | `DIR` 參數。 |
+| `parameters()` | `array<string,string\|list<string>>` | 所有參數，包含未知名稱。 |
 
 ## Attendee
 
-`Attendee` 代表一個可重複的 `ATTENDEE` property，不會依 address 合併。
+每筆 `ATTENDEE` 對應一個 `Attendee`。地址相同的參與者會保留為個別資料。
 
 | 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
-| `address` | `string` | 原始 cal-address。 |
-| `email`, `name` | `?string` | 移除 `mailto:` 後的地址與 `CN` 顯示名稱。 |
+| `address` | `string` | 原始行事曆地址。 |
+| `email` | `?string` | 移除 `mailto:` 前綴後的地址。前綴不分大小寫，沒有前綴時為 `null`。 |
+| `name` | `?string` | `CN` 顯示名稱。 |
 | `role`, `status`, `type` | `?string` | 大寫 `ROLE`、`PARTSTAT`、`CUTYPE`。 |
 | `rsvp` | `?bool` | `TRUE`、`FALSE`；缺少或無法識別時為 `null`。 |
 | `delegatedFrom`, `delegatedTo` | `Collection<int,string>` | 委派來源與對象的完整地址清單。 |
-| `parameters()` | `array<string,string\|list<string>>` | 包含未知值在內的全部 parameters。 |
+| `parameters()` | `array<string,string\|list<string>>` | 所有參數，包含未知名稱。 |
 
 ## Alarm 與 trigger
 
@@ -35,14 +36,14 @@ Event、Todo 與 Journal 都可取得主辦人和參與者；Event 與 Todo 另�
 | 欄位或方法 | 型別 | 說明 |
 | --- | --- | --- |
 | `action` | `?string` | `ACTION`。 |
-| `trigger` | `?AlarmTrigger` | 相對或絕對 `TRIGGER`。 |
+| `trigger` | `?AlarmTrigger` | 相對時間或指定時刻的 `TRIGGER`。 |
 | `description`, `summary` | `?string` | 提醒文字。 |
 | `attendees` | `Collection<int, Attendee>` | 依原始順序保留的提醒參與者。 |
-| `attachments` | `Collection<int, Property>` | 依原始順序保留的重複 `ATTACH` properties。 |
+| `attachments` | `Collection<int, Property>` | 依原始順序保留所有 `ATTACH` 屬性。 |
 | `repeat` | `?int` | `REPEAT` 次數。 |
 | `duration` | `?DateInterval` | 每次重複之間的時間。 |
 | `properties()`, `property()`, `hasProperty()` | `Collection` / `?Property` / `bool` | 查詢直接屬性，或判斷屬性是否存在。 |
-| `rawComponent()` | `VAlarm` | 底層的 alarm component。 |
+| `rawComponent()` | `VAlarm` | 對應的 Sabre 提醒元件。 |
 
 ```php
 $trigger = $event->alarms->first()?->trigger;
@@ -54,6 +55,6 @@ $trigger?->dateTime();   // ?CarbonImmutable
 $trigger?->relatedTo();  // START、END 或 null
 ```
 
-相對提醒的 `duration()` 表示距離事件或待辦開始／結束時間的偏移量，`relatedTo()`
-指定以哪個時間為準。絕對提醒則由 `dateTime()` 提供確切時間。需要值與參數時可用
-`property('TRIGGER')`；需要完整提醒資料時可用 `rawComponent()`。
+相對提醒以 `relatedTo()` 指示的開始或結束時間為準，`duration()` 表示要提前或延後多久。
+如果提醒指定了確切時刻，可用 `dateTime()` 取得。要查看 `TRIGGER` 的屬性值及參數，
+可呼叫 `property('TRIGGER')`。

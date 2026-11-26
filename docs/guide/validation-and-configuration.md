@@ -2,13 +2,12 @@
 
 ## Invalid content and warnings
 
-`read*()` methods throw `InvalidCalendar` for invalid iCalendar content. Their `try*()`
-counterparts return `null` only for that exception; source, size, and configuration failures
-still throw their specific exceptions. The reader does not repair rejected content.
+Each read accepts one `VCALENDAR`. Invalid content throws `InvalidCalendar`, or returns `null`
+with a `try*()` method. Source, size, and configuration failures keep their specific exceptions. The reader does not repair invalid content.
 
-Validation includes BOOLEAN/FLOAT values and basic RRULE syntax and combinations.
-Invalid rules fail during reading; valid rules that cannot be expanded raise
-`UnsupportedRecurrence` when you call `occurrencesBetween()`.
+The reader checks values such as BOOLEAN and FLOAT and validates basic RRULE syntax and
+combinations. A valid rule that the package cannot expand can still be read.
+`occurrencesBetween()` throws `UnsupportedRecurrence` for that rule.
 
 ```php
 use Mattmy\ICalendar\Exceptions\InvalidCalendar;
@@ -21,8 +20,9 @@ try {
 }
 ```
 
-`issues()` explains rejected content; `$calendar->warnings()` reports issues with readable
-content or configuration. Both return `Collection<int, CalendarIssue>`.
+`issues()` gives the diagnostics reported for a failed read. After a successful read, use
+`$calendar->warnings()` to check for problems with the content or configuration. Both return
+`Collection<int, CalendarIssue>`.
 
 ## CalendarIssue
 
@@ -52,18 +52,15 @@ return [
 ];
 ```
 
-`max_bytes` must be a positive integer. The limit is enforced against bytes actually read,
-not client-provided metadata. An invalid value throws `InvalidConfiguration`.
+`max_bytes` must be a positive integer. The reader counts the bytes it reads and throws
+`InvalidConfiguration` if the setting itself is invalid.
 
 `floating_timezone` sets the timezone for DATE values and date-times without `Z` or `TZID`.
 Use an IANA timezone name, such as `Asia/Taipei`, or `null`:
 
-- A valid non-null package value is used.
-- An invalid non-null package value produces a warning and uses UTC; it does not fall back
-  to `app.timezone`.
-- When the package value is `null`, a valid `app.timezone` is used.
-- When both the package value is `null` and `app.timezone` is invalid, a warning is produced
-  and UTC is used.
+- A valid timezone name overrides `app.timezone`.
+- An invalid value other than `null` uses UTC and reports a warning.
+- `null` uses `app.timezone`. If `app.timezone` is invalid, the reader uses UTC and reports a warning.
 
 The package validates `app.timezone` in every case, so an invalid application setting remains
 visible as a warning even when a valid package override is used.
@@ -80,9 +77,9 @@ All package exceptions implement `ICalendarException`.
 | `CalendarTooLarge` | Actual input exceeds `max_bytes`. |
 | `InvalidCalendarSource` | Wrong resource type, unreadable stream mode, or invalid upload. |
 | `InvalidConfiguration` | `max_bytes` is not a positive integer. |
-| `UnsupportedRecurrence` | A valid recurrence series cannot be expanded safely. |
+| `UnsupportedRecurrence` | The package cannot expand the recurrence rule or resolve a date it needs. |
 | `UnresolvableEventRange` | `eventsBetween()` cannot determine a required end time; also applies to non-recurring events in `occurrencesBetween()`. The entire query fails. |
-| `RecurrenceLimitExceeded` | An occurrence query evaluated more than 3,500 candidates; request a narrower range. |
+| `RecurrenceLimitExceeded` | An occurrence query exceeded the 3,500-candidate limit. |
 
 PHP's `InvalidArgumentException` is used for blank lookup names or invalid query ranges;
 `JsonException` is used for JSON encoding failures. These are not package exceptions.
